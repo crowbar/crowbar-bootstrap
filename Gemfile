@@ -16,6 +16,9 @@
 
 source "https://rubygems.org"
 
-gem "sinatra"
-gem "sinatra-contrib"
-gem "haml"
+gem "puma", "~> 2.11.3"
+gem "sinatra", "~> 1.4.7"
+gem "sinatra-contrib", "~> 1.4.7"
+gem "haml", "~> 4.0.7"
+gem "ohai", "~> 6.24.2"
+gem "chef", "~> 10.32.2"
