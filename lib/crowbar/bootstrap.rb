@@ -14,8 +14,21 @@
 # limitations under the License.
 #
 
-source "https://rubygems.org"
+require "sinatra/base"
+require "sinatra/json"
+require "haml"
+require "tilt/haml"
 
-gem "sinatra"
-gem "sinatra-contrib"
-gem "haml"
+module Crowbar
+  class Bootstrap < Sinatra::Base
+    set :root, File.expand_path("../../../", __FILE__)
+
+    get "/" do
+      haml :index
+    end
+
+    post "/process" do
+
+    end
+  end
+end

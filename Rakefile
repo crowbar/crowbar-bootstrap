@@ -13,9 +13,3 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-source "https://rubygems.org"
-
-gem "sinatra"
-gem "sinatra-contrib"
-gem "haml"

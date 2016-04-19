@@ -14,8 +14,7 @@
 # limitations under the License.
 #
 
-source "https://rubygems.org"
-
-gem "sinatra"
-gem "sinatra-contrib"
-gem "haml"
+module Crowbar
+  autoload :Bootstrap,
+    File.expand_path("../crowbar/bootstrap", __FILE__)
+end
