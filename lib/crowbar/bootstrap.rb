@@ -16,11 +16,16 @@
 
 require "sinatra/base"
 require "sinatra/json"
+require "sinatra/reloader"
 require "haml"
 require "tilt/haml"
 
 module Crowbar
   class Bootstrap < Sinatra::Base
+    configure :development do
+      register Sinatra::Reloader
+    end
+
     set :root, File.expand_path("../../../", __FILE__)
 
     get "/" do
@@ -28,7 +33,7 @@ module Crowbar
     end
 
     post "/process" do
-
+      json foo: "bar"
     end
   end
 end
