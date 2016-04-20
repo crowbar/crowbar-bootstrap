@@ -25,6 +25,9 @@ require "net/http"
 
 module Crowbar
   module Init
+    #
+    # Sinatra based web application
+    #
     class Application < Sinatra::Base
       configure :development do
         register Sinatra::Reloader
@@ -32,7 +35,7 @@ module Crowbar
 
       set :root, File.expand_path("../../../..", __FILE__)
       set :bind, "0.0.0.0"
-      set :haml, { format: :html5 }
+      set :haml, format: :html5
 
       get "/" do
         haml :index

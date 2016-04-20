@@ -22,6 +22,9 @@ if File.exist? ENV["CURRENT_GEMFILE"]
 end
 
 module Crowbar
+  #
+  # Application to initialize Crowbar
+  #
   module Init
     autoload :Application,
       File.expand_path("../init/application", __FILE__)
