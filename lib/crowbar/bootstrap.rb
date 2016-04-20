@@ -17,8 +17,12 @@
 require "sinatra/base"
 require "sinatra/json"
 require "sinatra/reloader"
+require "json"
 require "haml"
 require "tilt/haml"
+require "uri"
+require "net/http"
+require "net/http/digest_auth"
 
 module Crowbar
   class Bootstrap < Sinatra::Base
@@ -28,8 +32,39 @@ module Crowbar
 
     set :root, File.expand_path("../../../", __FILE__)
 
+    helpers do
+      def crowbar_status(user, pass)
+        digest_auth = Net::HTTP::DigestAuth.new
+
+        uri = URI.parse("http://localhost/installer/installer/status.json")
+        uri.user = user
+        uri.password = pass
+
+        h = Net::HTTP.new(uri.host, uri.port)
+        req = Net::HTTP::Get.new(uri.request_uri)
+        res = h.request(req)
+
+        auth = digest_auth.auth_header(uri, res['www-authenticate'], 'GET')
+        req = Net::HTTP::Get.new(uri.request_uri)
+        req.add_field('Authorization', auth)
+
+        res = h.request(req)
+        return {
+          code: res.code,
+          body: JSON.parse(res.body)
+        }
+      end
+    end
+
     get "/" do
       haml :index
+    end
+
+    get "/crowbar_status/:user/:password" do
+      res = crowbar_status(params[:user], params[:password])
+
+      status res[:code]
+      json res[:body]
     end
 
     post "/process" do
