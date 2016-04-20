@@ -14,7 +14,19 @@
 # limitations under the License.
 #
 
+ENV["CURRENT_GEMFILE"] ||= File.expand_path("../../../Gemfile", __FILE__)
+
+if File.exist? ENV["CURRENT_GEMFILE"]
+  require "bundler"
+  Bundler.setup(:default)
+end
+
 module Crowbar
-  autoload :Bootstrap,
-    File.expand_path("../crowbar/bootstrap", __FILE__)
+  module Init
+    autoload :Application,
+      File.expand_path("../init/application", __FILE__)
+
+    autoload :Version,
+      File.expand_path("../init/version", __FILE__)
+  end
 end

@@ -1,0 +1,41 @@
+inherit_from: .hound.suse.yml
+
+AllCops:
+  DisplayStyleGuide: true
+  DisplayCopNames: true
+
+Rails:
+  Enabled: true
+
+Style/RedundantReturn:
+  Exclude:
+    - "chef/data_bags/crowbar/migrate/*"
+
+Style/FileName:
+  Exclude:
+    - "lib/crowbar-*"
+
+Style/AlignHash:
+  EnforcedHashRocketStyle: key
+  EnforcedColonStyle: key
+
+Style/DotPosition:
+  EnforcedStyle: leading
+
+Style/CaseIndentation:
+  IndentWhenRelativeTo: end
+
+Lint/UnusedMethodArgument:
+  Enabled: false
+
+Lint/UnusedBlockArgument:
+  Enabled: false
+
+Metrics/MethodLength:
+  Max: 50
+
+Metrics/ClassLength:
+  Max: 500
+
+Metrics/ModuleLength:
+  Max: 500

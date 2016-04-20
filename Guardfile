@@ -14,20 +14,23 @@
 # limitations under the License.
 #
 
-source "https://rubygems.org"
-gemspec
+guard :rspec, all_on_start: true, cmd: "bundle exec rspec" do
+  require "guard/rspec/dsl"
+  dsl = Guard::RSpec::Dsl.new(self)
 
-group :development do
-  gem "guard", require: false
-  gem "guard-rubocop", require: false
-  gem "guard-rspec", require: false
+  rspec = dsl.rspec
+  watch(rspec.spec_helper) { rspec.spec_dir }
+  watch(rspec.spec_support) { rspec.spec_dir }
+  watch(rspec.spec_files)
+
+  ruby = dsl.ruby
+  dsl.watch_spec_files_for(ruby.lib_files)
 end
 
-group :test do
-  gem "simplecov", require: false
-  gem "coveralls", require: false
-  gem "codeclimate-test-reporter", require: false
-  gem "rubocop", require: false
-end
+guard :rubocop, all_on_start: true, cli: "-c .hound.ruby.yml" do
+  watch(%r{.+\.rb$})
 
-instance_eval(File.read("Gemfile.local")) if File.exist? "Gemfile.local"
+  watch(%r{(?:.+/)?\.houn\..*\.yml$}) do |m|
+    File.dirname(m[0])
+  end
+end

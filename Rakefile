@@ -13,3 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+begin
+  require "bundler"
+  Bundler::GemHelper.install_tasks
+rescue LoadError
+  warn "Failed to load bundler tasks"
+end
+
+require "rubocop/rake_task"
+RuboCop::RakeTask.new(:rubocop) do |task|
+  task.options = [
+    "-c",
+    ".hound.ruby.yml"
+  ]
+end
+
+require "rspec/core/rake_task"
+RSpec::Core::RakeTask.new(:spec)
+
+require "yard"
+YARD::Rake::YardocTask.new
+
+task default: [:spec, :rubocop]

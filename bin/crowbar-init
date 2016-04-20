@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 #
 # Copyright 2016, SUSE Linux GmbH
 #
@@ -14,20 +15,21 @@
 # limitations under the License.
 #
 
-source "https://rubygems.org"
-gemspec
+$LOAD_PATH.push File.expand_path("../../lib", __FILE__)
 
-group :development do
-  gem "guard", require: false
-  gem "guard-rubocop", require: false
-  gem "guard-rspec", require: false
+Signal.trap("INT") do
+  abort
 end
 
-group :test do
-  gem "simplecov", require: false
-  gem "coveralls", require: false
-  gem "codeclimate-test-reporter", require: false
-  gem "rubocop", require: false
+begin
+  require "crowbar/init"
+rescue LoadError
+  require "rubygems"
+  require "crowbar/init"
 end
 
-instance_eval(File.read("Gemfile.local")) if File.exist? "Gemfile.local"
+begin
+  Crowbar::Init::Application.run!
+rescue Interrupt
+  abort "Quitting..."
+end

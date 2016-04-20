@@ -1,0 +1,18 @@
+engines:
+  eslint:
+    enabled: true
+  csslint:
+    enabled: true
+  scss-lint:
+    enabled: true
+
+ratings:
+  paths:
+    - crowbar_framework/**/*
+    - chef/**/*
+    - lib/**/*
+    - bin/**/*
+
+exclude_paths:
+  - spec/**/*
+  - vendor/**/*
