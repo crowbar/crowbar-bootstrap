@@ -31,6 +31,7 @@ module Crowbar
       end
 
       set :root, File.expand_path("../../../..", __FILE__)
+      set :bind, "0.0.0.0"
       set :haml, { format: :html5 }
 
       get "/" do
