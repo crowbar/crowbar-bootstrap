@@ -60,4 +60,6 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency "haml", ">= 4.0.7"
   s.add_runtime_dependency "sass", ">= 3.4.22"
   s.add_runtime_dependency "coffee-script", ">= 2.4.1"
+  s.add_runtime_dependency "bootstrap-sass", ">= 3.3.6"
+  s.add_runtime_dependency "font-awesome-sass", ">= 4.5.0"
 end

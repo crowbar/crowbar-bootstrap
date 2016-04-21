@@ -26,6 +26,8 @@ require "sass"
 require "coffee_script"
 require "sprockets"
 require "sprockets-helpers"
+require "bootstrap-sass"
+require "font-awesome-sass"
 
 module Crowbar
   module Init
@@ -43,8 +45,10 @@ module Crowbar
 
       configure do
         sprockets.append_path File.join(root, "assets", "stylesheets")
+        sprockets.append_path File.join(root, "vendor", "assets", "stylesheets")
+
         sprockets.append_path File.join(root, "assets", "javascripts")
-        sprockets.append_path File.join(root, "assets", "images")
+        sprockets.append_path File.join(root, "vendor", "assets", "javascripts")
 
         Sprockets::Helpers.configure do |config|
           config.environment = sprockets

@@ -24,7 +24,6 @@
 /coverage
 /pkg
 /doc
-/vendor
 
 /Gemfile.lock
 /Gemfile.local
