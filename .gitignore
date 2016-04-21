@@ -19,6 +19,7 @@
 /.idea
 /.yardoc
 /.bundle
+/.sass-cache
 
 /coverage
 /pkg

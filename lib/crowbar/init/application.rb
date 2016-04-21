@@ -22,6 +22,10 @@ require "tilt/haml"
 require "json"
 require "uri"
 require "net/http"
+require "sass"
+require "coffee_script"
+require "sprockets"
+require "sprockets-helpers"
 
 module Crowbar
   module Init
@@ -29,13 +33,35 @@ module Crowbar
     # Sinatra based web application
     #
     class Application < Sinatra::Base
+      set :root, File.expand_path("../../../..", __FILE__)
+      set :bind, "0.0.0.0"
+      set :haml, format: :html5, attr_wrapper: "\""
+
+      set :sprockets, Sprockets::Environment.new(root)
+      set :assets_prefix, "/assets"
+      set :digest_assets, false
+
+      configure do
+        sprockets.append_path File.join(root, "assets", "stylesheets")
+        sprockets.append_path File.join(root, "assets", "javascripts")
+        sprockets.append_path File.join(root, "assets", "images")
+
+        Sprockets::Helpers.configure do |config|
+          config.environment = sprockets
+          config.prefix = assets_prefix
+          config.digest = digest_assets
+          config.public_path = public_folder
+          config.debug = true if development?
+        end
+      end
+
       configure :development do
         register Sinatra::Reloader
       end
 
-      set :root, File.expand_path("../../../..", __FILE__)
-      set :bind, "0.0.0.0"
-      set :haml, format: :html5
+      helpers do
+        include Sprockets::Helpers
+      end
 
       get "/" do
         haml :index
@@ -72,6 +98,14 @@ module Crowbar
         end
 
         json result
+      end
+
+      get "/assets/*" do
+        settings.sprockets.call(
+          env.merge(
+            "PATH_INFO" => params[:splat].first
+          )
+        )
       end
 
       protected

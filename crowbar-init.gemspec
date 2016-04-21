@@ -38,7 +38,7 @@ Gem::Specification.new do |s|
 
   s.files = ["CHANGELOG.md", "README.md", "LICENSE"]
   s.files += Dir.glob("lib/**/*")
-  s.files += Dir.glob("bin/**/*")
+  s.files += Dir.glob("bin/**/crowbar-*")
 
   s.test_files = Dir.glob("spec/**/*")
 
@@ -54,7 +54,10 @@ Gem::Specification.new do |s|
   s.add_development_dependency "webmock"
 
   s.add_runtime_dependency "puma", ">= 2.11.3"
+  s.add_runtime_dependency "sprockets-helpers", ">= 1.2.1"
   s.add_runtime_dependency "sinatra", ">= 1.4.7"
   s.add_runtime_dependency "sinatra-contrib", ">= 1.4.7"
   s.add_runtime_dependency "haml", ">= 4.0.7"
+  s.add_runtime_dependency "sass", ">= 3.4.22"
+  s.add_runtime_dependency "coffee-script", ">= 2.4.1"
 end
