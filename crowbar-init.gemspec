@@ -22,8 +22,8 @@ Gem::Specification.new do |s|
   s.version = Crowbar::Init::Version
   s.date = Time.now.utc.strftime("%F")
 
-  s.authors = ["Thomas Boerger"]
-  s.email = ["tboerger@suse.de"]
+  s.authors = ["Thomas Boerger", "Maximilian Meister"]
+  s.email = ["tboerger@suse.de", "mmeister@suse.de"]
 
   s.summary = <<-EOF
     Init process for Crowbar
@@ -62,4 +62,5 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency "coffee-script", ">= 2.4.1"
   s.add_runtime_dependency "bootstrap-sass", ">= 3.3.6"
   s.add_runtime_dependency "font-awesome-sass", ">= 4.5.0"
+  s.add_runtime_dependency "closure-compiler", ">= 1.1.10"
 end
