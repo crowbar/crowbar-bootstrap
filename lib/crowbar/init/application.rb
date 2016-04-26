@@ -96,6 +96,7 @@ module Crowbar
         end
 
         def reload_apache
+          logger.debug("Reloading apache")
           system(
             "sudo",
             "systemctl",
