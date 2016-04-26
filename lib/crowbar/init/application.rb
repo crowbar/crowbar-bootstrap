@@ -78,6 +78,35 @@ module Crowbar
         def status_url
           "http://localhost:3000/installer/installer/status.json"
         end
+
+        def symlink_apache_to(name)
+          crowbar_apache_conf = "#{crowbar_apache_path}/crowbar.conf"
+          crowbar_apache_conf_partial = "crowbar-#{name}.conf.partial"
+
+          logger.debug(
+            "Creating symbolic link for #{crowbar_apache_conf} to #{crowbar_apache_conf_partial}"
+          )
+          system(
+            "sudo",
+            "ln",
+            "-sf",
+            crowbar_apache_conf_partial,
+            crowbar_apache_conf
+          )
+        end
+
+        def reload_apache
+          system(
+            "sudo",
+            "systemctl",
+            "reload",
+            "apache2.service"
+          )
+        end
+
+        def crowbar_apache_path
+          "/etc/apache2/conf.d/crowbar"
+        end
       end
 
       get "/" do
@@ -85,7 +114,13 @@ module Crowbar
       end
 
       post "/init" do
-        json foo: "bar"
+        symlink_apache_to(:rails)
+        reload_apache
+      end
+
+      post "/reset" do
+        symlink_apache_to(:sinatra)
+        reload_apache
       end
 
       get "/status" do
