@@ -108,6 +108,26 @@ module Crowbar
         def crowbar_apache_path
           "/etc/apache2/conf.d/crowbar"
         end
+
+        def cleanup_db
+          logger.debug("Creating and migrating crowbar database")
+          Dir.chdir("/opt/dell/crowbar_framework") do
+            system(
+              "bin/rake",
+              "db:cleanup"
+            )
+          end
+        end
+
+        def crowbar_service(action)
+          logger.debug("#{action.capitalize}ing crowbar service")
+          system(
+            "sudo",
+            "systemctl",
+            action,
+            "crowbar.service"
+          )
+        end
       end
 
       get "/" do
@@ -115,13 +135,21 @@ module Crowbar
       end
 
       post "/init" do
+        cleanup_db
+        crowbar_service(:start)
         symlink_apache_to(:rails)
         reload_apache
+
+        redirect "/"
       end
 
       post "/reset" do
+        crowbar_service(:stop)
+        cleanup_db
         symlink_apache_to(:sinatra)
         reload_apache
+
+        redirect "/"
       end
 
       get "/status" do
