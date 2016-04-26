@@ -49,7 +49,7 @@ module Crowbar
         else
           "/var/log/crowbar-init/#{settings.environment}.log"
         end
-        logfile = File.new(logpath, 'a+')
+        logfile = File.new(logpath, "a+")
         logfile.sync = true
         use Rack::CommonLogger, logfile
 
