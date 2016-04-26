@@ -64,6 +64,10 @@ module Crowbar
 
       helpers do
         include Sprockets::Helpers
+
+        def status_url
+          "http://localhost:3000/installer/installer/status.json"
+        end
       end
 
       get "/" do
@@ -109,12 +113,6 @@ module Crowbar
             "PATH_INFO" => params[:splat].first
           )
         )
-      end
-
-      protected
-
-      def status_url
-        "http://localhost:3000/installer/installer/status.json"
       end
     end
   end
