@@ -113,6 +113,7 @@ module Crowbar
           logger.debug("Creating and migrating crowbar database")
           Dir.chdir("/opt/dell/crowbar_framework") do
             system(
+              "RAILS_ENV=production",
               "bin/rake",
               "db:cleanup"
             )
