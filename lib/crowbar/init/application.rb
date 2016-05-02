@@ -75,8 +75,12 @@ module Crowbar
       helpers do
         include Sprockets::Helpers
 
+        def installer_url
+          "http://localhost:3000/installer/installer"
+        end
+
         def status_url
-          "http://localhost:3000/installer/installer/status.json"
+          "#{installer_url}/status.json"
         end
 
         def symlink_apache_to(name)
@@ -129,6 +133,53 @@ module Crowbar
             "crowbar.service"
           )
         end
+
+        def crowbar_status(request_type = :html)
+          uri = if request_type == :html
+            URI.parse(installer_url)
+          else
+            URI.parse(status_url)
+          end
+
+          res = Net::HTTP.new(
+            uri.host,
+            uri.port
+          ).request(
+            Net::HTTP::Get.new(
+              uri.request_uri
+            )
+          )
+
+          body = if request_type == :html
+            res.body
+          else
+            JSON.parse(res.body)
+          end
+
+          {
+            code: res.code,
+            body: body
+          }
+        rescue
+          {
+            code: 500,
+            body: nil
+          }
+        end
+
+        def wait_for_crowbar
+          logger.debug("Waiting for crowbar to become available")
+          until crowbar_status[:body]
+            sleep 1
+          end
+          until crowbar_status[:body].include? "installer-installers"
+            sleep 1
+          end
+
+          # apache takes some time to perform the final switch
+          # TODO: implement a busyloop
+          sleep 15
+        end
       end
 
       get "/" do
@@ -140,8 +191,9 @@ module Crowbar
         crowbar_service(:start)
         symlink_apache_to(:rails)
         reload_apache
+        wait_for_crowbar
 
-        redirect "/"
+        redirect "/installer/installer"
       end
 
       post "/reset" do
@@ -154,32 +206,7 @@ module Crowbar
       end
 
       get "/status" do
-        uri = URI.parse(
-          status_url
-        )
-
-        result = begin
-          res = Net::HTTP.new(
-            uri.host,
-            uri.port
-          ).request(
-            Net::HTTP::Get.new(
-              uri.request_uri
-            )
-          )
-
-          {
-            code: res.code,
-            body: JSON.parse(res.body)
-          }
-        rescue
-          {
-            code: 500,
-            body: nil
-          }
-        end
-
-        json result
+        json crowbar_status(:json)
       end
 
       get "/assets/*" do
