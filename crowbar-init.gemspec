@@ -55,6 +55,8 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency "puma", "~> 2.11.3"
   s.add_runtime_dependency "sprockets-helpers", "~> 1.2.1"
+  s.add_runtime_dependency "tilt", "~> 1.1"
+  s.add_runtime_dependency "json", "<= 1.8.1", ">= 1.4.4"
   s.add_runtime_dependency "sinatra", "~> 1.4.7"
   s.add_runtime_dependency "sinatra-contrib", "~> 1.4.7"
   s.add_runtime_dependency "haml", "~> 4.0.6"
