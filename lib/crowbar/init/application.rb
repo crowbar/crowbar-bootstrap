@@ -124,7 +124,7 @@ module Crowbar
           system(
             "sudo",
             "systemctl",
-            action,
+            action.to_s,
             "crowbar.service"
           )
         end
