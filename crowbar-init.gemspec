@@ -22,15 +22,23 @@ Gem::Specification.new do |s|
   s.version = Crowbar::Init::Version
   s.date = Time.now.utc.strftime("%F")
 
-  s.authors = ["Thomas Boerger", "Maximilian Meister"]
-  s.email = ["tboerger@suse.de", "mmeister@suse.de"]
+  s.authors = [
+    "Thomas Boerger",
+    "Maximilian Meister",
+    "Rick Salevsky"
+  ]
+  s.email = [
+    "tboerger@suse.de",
+    "mmeister@suse.de",
+    "rsalevsky@suse.com"
+  ]
 
   s.summary = <<-EOF
-    Init process for Crowbar
+    Crowbar installer
   EOF
 
   s.description = <<-EOF
-    Init process for Crowbar
+    Standalone service for the Crowbar configration
   EOF
 
   s.homepage = "https://github.com/crowbar/crowbar-init"
@@ -38,7 +46,7 @@ Gem::Specification.new do |s|
 
   s.files = ["CHANGELOG.md", "README.md", "LICENSE"]
   s.files += Dir.glob("lib/**/*")
-  s.files += Dir.glob("bin/**/crowbar-*")
+  s.files += Dir.glob("bin/**/crowbar*")
 
   s.test_files = Dir.glob("spec/**/*")
 
