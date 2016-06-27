@@ -71,5 +71,5 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency "sass", ">= 3.4.13"
   s.add_runtime_dependency "bootstrap-sass", ">= 3.3.5"
   s.add_runtime_dependency "font-awesome-sass", ">= 4.5.0"
-  s.add_runtime_dependency "closure-compiler", ">= 1.1.10"
+  s.add_runtime_dependency "uglifier", ">= 2.7.2"
 end
