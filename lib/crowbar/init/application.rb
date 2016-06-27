@@ -36,7 +36,7 @@ module Crowbar
     class Application < Sinatra::Base
       set :root, File.expand_path("../../../..", __FILE__)
       set :bind, "0.0.0.0"
-      set :logging, Logger::DEBUG
+      set :logging, true
       set :haml, format: :html5, attr_wrapper: "\""
 
       set :sprockets, Sprockets::Environment.new(root)
@@ -47,7 +47,7 @@ module Crowbar
         logpath = if settings.environment == :development
           "#{settings.root}/log/#{settings.environment}.log"
         else
-          "/var/log/crowbar-init/#{settings.environment}.log"
+          "/var/log/crowbar/crowbar-init-#{settings.environment}.log"
         end
         logfile = File.new(logpath, "a+")
         logfile.sync = true

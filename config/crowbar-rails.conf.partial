@@ -1,0 +1,11 @@
+ProxyPass / http://127.0.0.1:3000/ timeout=1500 Keepalive=On
+ProxyPassReverse / http://127.0.0.1:3000/
+SetEnv proxy-initial-not-pooled 1
+
+<Location />
+    AuthType Digest
+    AuthName "SUSE OpenStack Cloud Admin Server"
+    AuthDigestProvider file
+    AuthUserFile /opt/dell/crowbar_framework/htdigest
+    Require valid-user
+</Location>
