@@ -1,0 +1,30 @@
+{
+    "providing": {
+    },
+    "attributes": {
+    },
+    "replacing": {
+    },
+    "dependencies": {
+    },
+    "groupings": {
+    },
+    "recommendations": {
+    },
+    "platforms": {
+    },
+    "license": "Apache 2.0",
+    "version": "0.9.5",
+    "maintainer": "SUSE LINUX GmbH",
+    "suggestions": {
+    },
+    "recipes": {
+      "psql": "Installs and configures postgresql"
+    },
+    "maintainer_email": "crowbar@googlegroups.com",
+    "name": "postgresql",
+    "conflicting": {
+    },
+    "description": "Installs and configures postgresql",
+    "long_description": ""
+  }
