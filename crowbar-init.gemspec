@@ -45,8 +45,12 @@ Gem::Specification.new do |s|
   s.license = "Apache-2.0"
 
   s.files = ["CHANGELOG.md", "README.md", "LICENSE"]
-  s.files += Dir.glob("lib/**/*")
+  s.files += Dir.glob("assets/**/*")
   s.files += Dir.glob("bin/**/crowbar*")
+  s.files += Dir.glob("config/*")
+  s.files += Dir.glob("lib/**/*")
+  s.files += Dir.glob("vendor/**/*")
+  s.files += Dir.glob("views/**/*")
 
   s.test_files = Dir.glob("spec/**/*")
 
