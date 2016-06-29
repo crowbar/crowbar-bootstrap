@@ -64,6 +64,11 @@ Gem::Specification.new do |s|
   s.add_development_dependency "yard"
   s.add_development_dependency "rspec"
   s.add_development_dependency "webmock"
+  s.add_development_dependency "listen", "<= 3.0.6"
+  s.add_development_dependency "guard"
+  s.add_development_dependency "guard-remote-sync"
+  s.add_development_dependency "guard-rspec"
+  s.add_development_dependency "guard-rubocop"
 
   s.add_runtime_dependency "puma", ">= 2.11.3"
   s.add_runtime_dependency "sprockets-helpers", ">= 1.2.1"
