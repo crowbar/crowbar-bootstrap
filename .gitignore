@@ -20,6 +20,7 @@
 /.yardoc
 /.bundle
 /.sass-cache
+/.guard-exclude
 
 /coverage
 /pkg
