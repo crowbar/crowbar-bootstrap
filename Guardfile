@@ -37,9 +37,7 @@ def value_for(variable, default)
     default
   end
 
-  if target.empty?
-    fail "#{variable} have to be non-empty"
-  end
+  raise "#{variable} has to be non-empty" if target.empty?
 
   target
 end
@@ -63,8 +61,8 @@ notification :off
 
 group :tree do
   target = value_for(
-   "GUARD_SYNC_TARGET",
-   "/opt/crowbar/crowbar-init"
+    "GUARD_SYNC_TARGET",
+    "/opt/crowbar/crowbar-init"
   )
 
   exclude = File.expand_path(

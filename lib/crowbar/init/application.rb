@@ -169,12 +169,8 @@ module Crowbar
 
         def wait_for_crowbar
           logger.debug("Waiting for crowbar to become available")
-          until crowbar_status[:body]
-            sleep 1
-          end
-          until crowbar_status[:body].include? "installer-installers"
-            sleep 1
-          end
+          sleep 1 until crowbar_status[:body]
+          sleep 1 until crowbar_status[:body].include? "installer-installers"
 
           # apache takes some time to perform the final switch
           # TODO: implement a busyloop
