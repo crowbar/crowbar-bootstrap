@@ -28,6 +28,8 @@ require "sprockets-helpers"
 require "bootstrap-sass"
 require "font-awesome-sass"
 
+require "chef"
+
 module Crowbar
   module Init
     #
@@ -74,6 +76,21 @@ module Crowbar
 
       helpers do
         include Sprockets::Helpers
+
+        def chef_config_path
+          Pathname.new("#{settings.root}/chef")
+        end
+
+        def chef(attributes)
+          Chef::Config[:solo] = true
+          Chef::Config.from_file("#{chef_config_path}/solo.rb")
+          client = Chef::Client.new(
+            attributes,
+            override_runlist: ["recipe[postgresql]"]
+          )
+          logger.debug("Running chef solo with: #{client.inspect}")
+          client.run
+        end
 
         def installer_url
           "http://localhost:3000/installer/installer"
@@ -203,6 +220,58 @@ module Crowbar
 
       get "/status" do
         json crowbar_status(:json)
+      end
+
+      post "/database/new" do
+        attributes = {
+          postgresql: {
+            username: params[:username],
+            password: params[:password]
+          },
+          run_list: ["recipe[postgresql]"]
+        }
+
+        logger.debug("Creating Crowbar database")
+        if chef(attributes)
+          json(
+            code: 200,
+            body: nil
+          )
+        else
+          json(
+            code: 500,
+            body: {
+              error: "Could not create database. Please have a look at /var/log/chef/solo.log"
+            }
+          )
+        end
+      end
+
+      post "/database/connect" do
+        attributes = {
+          postgresql: {
+            username: params[:username],
+            password: params[:password],
+            host: params[:host],
+            port: params[:port]
+          },
+          run_list: ["recipe[postgresql]"]
+        }
+
+        logger.debug("Connecting Crowbar to external database")
+        if chef(attributes)
+          json(
+            code: 200,
+            body: nil
+          )
+        else
+          json(
+            code: 500,
+            body: {
+              error: "Could not connect to database. Please have a look at /var/log/chef/solo.log"
+            }
+          )
+        end
       end
 
       get "/assets/*" do
