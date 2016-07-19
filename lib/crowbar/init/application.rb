@@ -199,6 +199,7 @@ module Crowbar
         haml :index
       end
 
+      # api :POST, "Initialize Crowbar"
       post "/init" do
         cleanup_db
         crowbar_service(:start)
@@ -209,6 +210,7 @@ module Crowbar
         redirect "/installer/installer"
       end
 
+      # api :POST, "Reset Crowbar"
       post "/reset" do
         crowbar_service(:stop)
         cleanup_db
@@ -218,10 +220,14 @@ module Crowbar
         redirect "/"
       end
 
+      # api :GET, "Crowbar status"
       get "/status" do
         json crowbar_status(:json)
       end
 
+      # api :POST, "Create a new Crowbar database"
+      # param :username, String, desc: "Username"
+      # param :password, String, desc: "Password"
       post "/database/new" do
         attributes = {
           postgresql: {
@@ -247,6 +253,11 @@ module Crowbar
         end
       end
 
+      # api :POST, "Connect Crowbar to an existing external database"
+      # param :username, String, desc: "External database username"
+      # param :password, String, desc: "External database password"
+      # param :host, String, desc: "External database host"
+      # param :port, Integer, desc: "External database port"
       post "/database/connect" do
         attributes = {
           postgresql: {
@@ -274,6 +285,7 @@ module Crowbar
         end
       end
 
+      # internal API endpoint
       get "/assets/*" do
         settings.sprockets.call(
           env.merge(
