@@ -28,6 +28,8 @@ require "sprockets-helpers"
 require "bootstrap-sass"
 require "font-awesome-sass"
 
+require "chef"
+
 module Crowbar
   module Init
     #
@@ -74,6 +76,21 @@ module Crowbar
 
       helpers do
         include Sprockets::Helpers
+
+        def chef_config_path
+          Pathname.new("#{settings.root}/chef")
+        end
+
+        def chef(attributes)
+          Chef::Config[:solo] = true
+          Chef::Config.from_file("#{chef_config_path}/solo.rb")
+          client = Chef::Client.new(
+            attributes,
+            override_runlist: ["recipe[postgresql]"]
+          )
+          logger.debug("Running chef solo with: #{client.inspect}")
+          client.run
+        end
 
         def installer_url
           "http://localhost:3000/installer/installer"
@@ -182,6 +199,7 @@ module Crowbar
         haml :index
       end
 
+      # api :POST, "Initialize Crowbar"
       post "/init" do
         cleanup_db
         crowbar_service(:start)
@@ -192,6 +210,7 @@ module Crowbar
         redirect "/installer/installer"
       end
 
+      # api :POST, "Reset Crowbar"
       post "/reset" do
         crowbar_service(:stop)
         cleanup_db
@@ -201,10 +220,72 @@ module Crowbar
         redirect "/"
       end
 
+      # api :GET, "Crowbar status"
       get "/status" do
         json crowbar_status(:json)
       end
 
+      # api :POST, "Create a new Crowbar database"
+      # param :username, String, desc: "Username"
+      # param :password, String, desc: "Password"
+      post "/database/new" do
+        attributes = {
+          postgresql: {
+            username: params[:username],
+            password: params[:password]
+          },
+          run_list: ["recipe[postgresql]"]
+        }
+
+        logger.debug("Creating Crowbar database")
+        if chef(attributes)
+          json(
+            code: 200,
+            body: nil
+          )
+        else
+          json(
+            code: 500,
+            body: {
+              error: "Could not create database. Please have a look at /var/log/chef/solo.log"
+            }
+          )
+        end
+      end
+
+      # api :POST, "Connect Crowbar to an existing external database"
+      # param :username, String, desc: "External database username"
+      # param :password, String, desc: "External database password"
+      # param :host, String, desc: "External database host"
+      # param :port, Integer, desc: "External database port"
+      post "/database/connect" do
+        attributes = {
+          postgresql: {
+            username: params[:username],
+            password: params[:password],
+            host: params[:host],
+            port: params[:port]
+          },
+          run_list: ["recipe[postgresql]"]
+        }
+
+        logger.debug("Connecting Crowbar to external database")
+        if chef(attributes)
+          json(
+            code: 200,
+            body: nil
+          )
+        else
+          json(
+            code: 500,
+            body: {
+              error: "Could not connect to database. Please have a look at /var/log/chef/solo.log"
+            }
+          )
+        end
+      end
+
+      # internal API endpoint
       get "/assets/*" do
         settings.sprockets.call(
           env.merge(
