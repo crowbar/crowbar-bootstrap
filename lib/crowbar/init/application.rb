@@ -36,6 +36,7 @@ module Crowbar
     # Sinatra based web application
     #
     class Application < Sinatra::Base
+      set :server, :puma
       set :root, File.expand_path("../../../..", __FILE__)
       set :bind, "0.0.0.0"
       set :logging, true
