@@ -50,7 +50,7 @@ module Crowbar
         logpath = if settings.environment == :development
           "#{settings.root}/log/#{settings.environment}.log"
         else
-          "/var/log/crowbar/crowbar-init-#{settings.environment}.log"
+          "/var/log/crowbar/crowbar_init_#{settings.environment}.log"
         end
         logfile = File.new(logpath, "a+")
         logfile.sync = true
