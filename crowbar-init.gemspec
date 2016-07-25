@@ -47,6 +47,7 @@ Gem::Specification.new do |s|
   s.files = ["CHANGELOG.md", "README.md", "LICENSE"]
   s.files += Dir.glob("assets/**/*")
   s.files += Dir.glob("bin/**/crowbar*")
+  s.files += Dir.glob("chef/**/*")
   s.files += Dir.glob("config/*")
   s.files += Dir.glob("lib/**/*")
   s.files += Dir.glob("vendor/**/*")
