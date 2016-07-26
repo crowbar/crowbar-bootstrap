@@ -131,13 +131,24 @@ module Crowbar
           "/etc/apache2/conf.d/crowbar"
         end
 
-        def cleanup_db
+        def cleanup_db_rake
           logger.debug("Creating and migrating crowbar database")
           Dir.chdir("/opt/dell/crowbar_framework") do
             system(
               "RAILS_ENV=production",
               "bin/rake",
               "db:cleanup"
+            )
+          end
+        end
+
+        def migrate_db_rake
+          logger.debug("Migrating crowbar database")
+          Dir.chdir("/opt/dell/crowbar_framework") do
+            system(
+              "RAILS_ENV=production",
+              "bin/rake",
+              "db:migrate"
             )
           end
         end
@@ -202,8 +213,7 @@ module Crowbar
 
       # api :POST, "Initialize Crowbar"
       post "/init" do
-        if cleanup_db && \
-            crowbar_service(:start) && \
+        if crowbar_service(:start) && \
             symlink_apache_to(:rails) && \
             reload_apache && \
             wait_for_crowbar
@@ -225,7 +235,6 @@ module Crowbar
       # api :POST, "Reset Crowbar"
       post "/reset" do
         if crowbar_service(:stop) && \
-            cleanup_db && \
             symlink_apache_to(:sinatra) && \
             reload_apache
 
@@ -261,7 +270,7 @@ module Crowbar
         }
 
         logger.debug("Creating Crowbar database")
-        if chef(attributes)
+        if chef(attributes) && cleanup_db_rake
           json(
             code: 200,
             body: nil
@@ -293,7 +302,7 @@ module Crowbar
         }
 
         logger.debug("Connecting Crowbar to external database")
-        if chef(attributes)
+        if chef(attributes) && migrate_db_rake
           json(
             code: 200,
             body: nil
