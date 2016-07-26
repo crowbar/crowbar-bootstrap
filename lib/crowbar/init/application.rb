@@ -202,23 +202,45 @@ module Crowbar
 
       # api :POST, "Initialize Crowbar"
       post "/init" do
-        cleanup_db
-        crowbar_service(:start)
-        symlink_apache_to(:rails)
-        reload_apache
-        wait_for_crowbar
+        if cleanup_db && \
+            crowbar_service(:start) && \
+            symlink_apache_to(:rails) && \
+            reload_apache && \
+            wait_for_crowbar
 
-        redirect "/installer/installer"
+          json(
+            code: 200,
+            body: nil
+          )
+        else
+          json(
+            code: 500,
+            body: {
+              error: "Could not initialize Crowbar"
+            }
+          )
+        end
       end
 
       # api :POST, "Reset Crowbar"
       post "/reset" do
-        crowbar_service(:stop)
-        cleanup_db
-        symlink_apache_to(:sinatra)
-        reload_apache
+        if crowbar_service(:stop) && \
+            cleanup_db && \
+            symlink_apache_to(:sinatra) && \
+            reload_apache
 
-        redirect "/"
+          json(
+            code: 200,
+            body: nil
+          )
+        else
+          json(
+            code: 500,
+            body: {
+              error: "Could not reset Crowbar to crowbar-init"
+            }
+          )
+        end
       end
 
       # api :GET, "Crowbar status"
