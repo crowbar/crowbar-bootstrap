@@ -87,7 +87,7 @@ module Crowbar
           Chef::Config.from_file("#{chef_config_path}/solo.rb")
           client = Chef::Client.new(
             attributes,
-            override_runlist: ["recipe[postgresql]"]
+            override_runlist: attributes[:run_list]
           )
           logger.debug("Running chef solo with: #{client.inspect}")
           client.run
@@ -257,7 +257,7 @@ module Crowbar
             username: params[:username],
             password: params[:password]
           },
-          run_list: ["recipe[postgresql]"]
+          run_list: ["recipe[postgresql::default]"]
         }
 
         logger.debug("Creating Crowbar database")
@@ -289,7 +289,7 @@ module Crowbar
             host: params[:host],
             port: params[:port]
           },
-          run_list: ["recipe[postgresql]"]
+          run_list: ["recipe[postgresql::config]"]
         }
 
         logger.debug("Connecting Crowbar to external database")
