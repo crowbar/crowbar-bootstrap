@@ -28,6 +28,7 @@ require "sprockets-helpers"
 require "bootstrap-sass"
 require "font-awesome-sass"
 require "open3"
+require "pg"
 
 require "chef"
 
@@ -102,6 +103,19 @@ module Crowbar
               exit_code: wait_thr.value.exitstatus
             }
           end
+        end
+
+        def test_db_connection(attributes)
+          conn = PG.connect(
+            user: attributes[:username],
+            password: attributes[:password],
+            host: attributes[:host],
+            port: attributes[:port],
+            dbname: attributes[:database]
+          )
+          conn.status
+        ensure
+          conn.close if conn
         end
 
         def installer_url
@@ -301,6 +315,46 @@ module Crowbar
       # api :GET, "Crowbar status"
       get "/status" do
         json crowbar_status(:json)
+      end
+
+      # api :POST, "Create a new Crowbar database"
+      # param :username, String, desc: "Username"
+      # param :password, String, desc: "Password"
+      # param :database, String, desc: "Database name"
+      # param :host, String, desc: "External database host"
+      # param :port, Integer, desc: "External database port"
+      post "/database/test" do
+        attributes = {
+          username: params[:username],
+          password: params[:password],
+          database: params[:database],
+          host: params[:host],
+          port: params[:port]
+        }
+
+        logger.debug("Testing connectivity to external database")
+        begin
+          if test_db_connection(attributes)
+            json(
+              code: 200,
+              body: nil
+            )
+          else
+            json(
+              code: 503,
+              body: {
+                error: "Could not connect to database"
+              }
+            )
+          end
+        rescue => e
+          json(
+            code: 500,
+            body: {
+              error: e.message.inspect
+            }
+          )
+        end
       end
 
       # api :POST, "Create a new Crowbar database"
