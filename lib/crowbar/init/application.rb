@@ -95,7 +95,7 @@ module Crowbar
             attributes,
             override_runlist: attributes[:run_list]
           )
-          logger.debug("Running chef solo with: #{client.inspect}")
+          logger.debug("Running chef solo with: #{attributes[:run_list]}")
           client.run
         end
 
