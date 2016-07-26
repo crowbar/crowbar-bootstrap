@@ -27,6 +27,7 @@ require "sprockets"
 require "sprockets-helpers"
 require "bootstrap-sass"
 require "font-awesome-sass"
+require "open3"
 
 require "chef"
 
@@ -93,6 +94,16 @@ module Crowbar
           client.run
         end
 
+        def run_cmd(*args)
+          Open3.popen3(*args) do |stdin, stdout, stderr, wait_thr|
+            {
+              stdout: stdout.gets(nil),
+              stderr: stderr.gets(nil),
+              exit_code: wait_thr.value.exitstatus
+            }
+          end
+        end
+
         def installer_url
           "http://localhost:3000/installer/installer"
         end
@@ -108,7 +119,7 @@ module Crowbar
           logger.debug(
             "Creating symbolic link for #{crowbar_apache_conf} to #{crowbar_apache_conf_partial}"
           )
-          system(
+          run_cmd(
             "sudo",
             "ln",
             "-sf",
@@ -119,7 +130,7 @@ module Crowbar
 
         def reload_apache
           logger.debug("Reloading apache")
-          system(
+          run_cmd(
             "sudo",
             "systemctl",
             "reload",
@@ -134,8 +145,8 @@ module Crowbar
         def cleanup_db_rake
           logger.debug("Creating and migrating crowbar database")
           Dir.chdir("/opt/dell/crowbar_framework") do
-            system(
-              "RAILS_ENV=production",
+            run_cmd(
+              { "RAILS_ENV" => "production" },
               "bin/rake",
               "db:cleanup"
             )
@@ -145,8 +156,8 @@ module Crowbar
         def migrate_db_rake
           logger.debug("Migrating crowbar database")
           Dir.chdir("/opt/dell/crowbar_framework") do
-            system(
-              "RAILS_ENV=production",
+            run_cmd(
+              { "RAILS_ENV" => "production" },
               "bin/rake",
               "db:migrate"
             )
@@ -155,7 +166,7 @@ module Crowbar
 
         def crowbar_service(action)
           logger.debug("#{action.capitalize}ing crowbar service")
-          system(
+          run_cmd(
             "sudo",
             "systemctl",
             action.to_s,
@@ -196,14 +207,29 @@ module Crowbar
           }
         end
 
+        # TODO: this method needs to be refactored a bit in general
         def wait_for_crowbar
           logger.debug("Waiting for crowbar to become available")
-          sleep 1 until crowbar_status[:body]
-          sleep 1 until crowbar_status[:body].include? "installer-installers"
+          begin
+            # TODO: add a timeout handling and set the status in case of a timeout
+            sleep 1 until crowbar_status[:body]
+            sleep 1 until crowbar_status[:body].include? "installer-installers"
 
-          # apache takes some time to perform the final switch
-          # TODO: implement a busyloop
-          sleep 15
+            # apache takes some time to perform the final switch
+            # TODO: implement a busyloop
+            sleep 15
+            {
+              stdout: "",
+              stderr: "",
+              exit_code: 0
+            }
+          rescue => e
+            {
+              stdout: "",
+              stderr: e.message.inspect,
+              exit_code: 1
+            }
+          end
         end
       end
 
@@ -213,43 +239,63 @@ module Crowbar
 
       # api :POST, "Initialize Crowbar"
       post "/init" do
-        if crowbar_service(:start) && \
-            symlink_apache_to(:rails) && \
-            reload_apache && \
-            wait_for_crowbar
+        status = {
+          code: 200,
+          body: nil
+        }
 
-          json(
-            code: 200,
-            body: nil
-          )
-        else
-          json(
-            code: 500,
-            body: {
-              error: "Could not initialize Crowbar"
-            }
-          )
+        [
+          [:crowbar_service, :start],
+          [:symlink_apache_to, :rails],
+          [:reload_apache],
+          [:wait_for_crowbar]
+        ].each do |command|
+          cmd_ret = send(*command)
+          next if cmd_ret[:exit_code] == 0
+
+          message = if cmd_ret[:stdout].nil? || cmd_ret[:stdout].empty?
+            cmd_ret[:stderr]
+          else
+            cmd_ret[:stdout]
+          end
+
+          status[:code] = 500
+          status[:body] = {
+            error: "#{command.inspect}: #{message}"
+          }
         end
+
+        json(status)
       end
 
       # api :POST, "Reset Crowbar"
       post "/reset" do
-        if crowbar_service(:stop) && \
-            symlink_apache_to(:sinatra) && \
-            reload_apache
+        status = {
+          code: 200,
+          body: nil
+        }
 
-          json(
-            code: 200,
-            body: nil
-          )
-        else
-          json(
-            code: 500,
-            body: {
-              error: "Could not reset Crowbar to crowbar-init"
-            }
-          )
+        [
+          [:crowbar_service, :stop],
+          [:symlink_apache_to, :sinatra],
+          [:reload_apache]
+        ].each do |command|
+          cmd_ret = send(*command)
+          next if cmd_ret[:exit_code] == 0
+
+          message = if cmd_ret[:stdout].nil? || cmd_ret[:stdout].empty?
+            cmd_ret[:stderr]
+          else
+            cmd_ret[:stdout]
+          end
+
+          status[:code] = 500
+          status[:body] = {
+            error: message
+          }
         end
+
+        json(status)
       end
 
       # api :GET, "Crowbar status"
