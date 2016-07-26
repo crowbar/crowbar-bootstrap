@@ -48,6 +48,10 @@ module Crowbar
       set :assets_prefix, "/assets"
       set :digest_assets, false
 
+      before do
+        logger.level = Logger::DEBUG
+      end
+
       configure do
         logpath = if settings.environment == :development
           "#{settings.root}/log/#{settings.environment}.log"
