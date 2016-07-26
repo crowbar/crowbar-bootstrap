@@ -334,6 +334,7 @@ module Crowbar
       # api :POST, "Connect Crowbar to an existing external database"
       # param :username, String, desc: "External database username"
       # param :password, String, desc: "External database password"
+      # param :database, String, desc: "Database name"
       # param :host, String, desc: "External database host"
       # param :port, Integer, desc: "External database port"
       post "/database/connect" do
@@ -341,6 +342,7 @@ module Crowbar
           postgresql: {
             username: params[:username],
             password: params[:password],
+            database: params[:database],
             host: params[:host],
             port: params[:port]
           },
