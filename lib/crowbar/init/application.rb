@@ -402,7 +402,8 @@ module Crowbar
             password: params[:password],
             database: params[:database],
             host: params[:host],
-            port: params[:port]
+            port: params[:port],
+            remote: true
           },
           run_list: ["recipe[postgresql::config]"]
         }
