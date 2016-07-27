@@ -329,14 +329,14 @@ module Crowbar
       # param :port, Integer, desc: "External database port"
       post "/database/test" do
         attributes = {
-          username: params[:username],
-          password: params[:password],
-          database: params[:database],
-          host: params[:host],
-          port: params[:port]
+          username: params[:username] || "crowbar",
+          password: params[:password] || "crowbar",
+          database: params[:database] || "crowbar_production",
+          host: params[:host] || "localhost",
+          port: params[:port] || 5432
         }
 
-        logger.debug("Testing connectivity to external database")
+        logger.debug("Testing connectivity to database")
         begin
           if test_db_connection(attributes)
             json(
