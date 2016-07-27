@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-template node[:postgresql][:config] do
+template node[:postgresql][:config][:rails] do
   source "database.yml.erb"
   group "crowbar"
   owner "crowbar"

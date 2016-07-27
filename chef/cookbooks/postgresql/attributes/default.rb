@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-default[:postgresql][:config] = "/opt/dell/crowbar_framework/config/database.yml"
+default[:postgresql][:config][:rails] = "/opt/dell/crowbar_framework/config/database.yml"
 default[:postgresql][:host] = "localhost"
 default[:postgresql][:port] = "5432"
 default[:postgresql][:database] = "crowbar_production"
