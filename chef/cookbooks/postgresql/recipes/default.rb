@@ -27,16 +27,37 @@ service "postgresql" do
   action [:enable, :start]
 end
 
-bash "psql --command \"CREATE USER #{node[:postgresql][:username]} PASSWORD '#{node[:postgresql][:password]}'\"" do
+bash "create crowbar user" do
   user "postgres"
-  not_if "psql --command \"SELECT * FROM pg_user WHERE usename='#{node[:postgresql][:username]}'\""
+  code <<-EOH
+    psql --command "CREATE USER #{node[:postgresql][:username]} \
+                    PASSWORD '#{node[:postgresql][:password]}'"
+EOH
+  only_if do
+    `sudo -u postgres psql -tAc "SELECT 1 FROM pg_user \
+                                 WHERE usename='#{node[:postgresql][:username]}'"`.empty?
+  end
 end
 
-bash "psql --command \"CREATE SCHEMA #{node[:postgresql][:database]}\"" do
+bash "create database schema" do
   user "postgres"
-  not_if "psql --command \"SELECT schema_name FROM information_schema.schemata WHERE schema_name = '#{node[:postgresql][:database]}'\""
+  code <<-EOH
+    psql --command "CREATE SCHEMA #{node[:postgresql][:database]} \
+                    AUTHORIZATION #{node[:postgresql][:username]}"
+    psql --command "CREATE DATABASE #{node[:postgresql][:database]} \
+                    OWNER #{node[:postgresql][:username]}"
+EOH
+  only_if do
+    `sudo -u postgres psql -tAc "SELECT 1 FROM information_schema.schemata \
+                                 WHERE schema_name = '#{node[:postgresql][:database]}'"`.empty?
+  end
 end
 
-bash "psql --command \"GRANT ALL ON SCHEMA #{node[:postgresql][:database]} TO #{node[:postgresql][:username]};\"" do
+bash "grant permissions" do
   user "postgres"
+  code <<-EOH
+    psql --command "GRANT ALL PRIVILEGES ON ALL TABLES \
+                    IN SCHEMA #{node[:postgresql][:database]} \
+                    TO #{node[:postgresql][:username]}"
+EOH
 end
