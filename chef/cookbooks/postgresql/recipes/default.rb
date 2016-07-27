@@ -14,8 +14,6 @@
 # limitations under the License.
 #
 
-include_recipe "postgresql::config"
-
 case node[:platform_family]
 when "suse"
   package "postgresql94-server"
@@ -26,6 +24,8 @@ end
 service "postgresql" do
   action [:enable, :start]
 end
+
+include_recipe "postgresql::config"
 
 bash "create crowbar user" do
   user "postgres"
