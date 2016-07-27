@@ -131,7 +131,7 @@ module Crowbar
         end
 
         def symlink_apache_to(name)
-          crowbar_apache_conf = "#{crowbar_apache_path}/crowbar.conf"
+          crowbar_apache_conf = "#{crowbar_apache_path}/crowbar.conf.partial"
           crowbar_apache_conf_partial = "crowbar-#{name}.conf.partial"
 
           logger.debug(
@@ -157,7 +157,7 @@ module Crowbar
         end
 
         def crowbar_apache_path
-          "/etc/apache2/conf.d/crowbar"
+          "/etc/apache2/conf.d"
         end
 
         def cleanup_db_rake
