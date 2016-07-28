@@ -89,14 +89,22 @@ module Crowbar
         end
 
         def chef(attributes)
-          Chef::Config[:solo] = true
-          Chef::Config.from_file("#{chef_config_path}/solo.rb")
-          client = Chef::Client.new(
-            attributes,
-            override_runlist: attributes[:run_list]
-          )
-          logger.debug("Running chef solo with: #{attributes[:run_list]}")
-          client.run
+          run_list = attributes[:run_list].first
+
+          logger.debug("Running chef solo with: #{run_list}")
+          Tempfile.open("chef_solo_json_attributes") do |f|
+            f.write(attributes.to_json)
+            f.close
+            cmd = [
+              "sudo",
+              "chef-solo",
+              "-c #{chef_config_path}/solo.rb",
+              "-j #{f.path}",
+              "-o '#{run_list}'"
+            ].join(" ")
+
+            run_cmd(cmd)
+          end
         end
 
         def run_cmd(*args)
@@ -374,7 +382,7 @@ module Crowbar
         }
 
         logger.debug("Creating Crowbar database")
-        if chef(attributes) && cleanup_db_rake
+        if chef(attributes)[:exit_code] == 0 && cleanup_db_rake
           json(
             code: 200,
             body: nil
@@ -409,7 +417,7 @@ module Crowbar
         }
 
         logger.debug("Connecting Crowbar to external database")
-        if chef(attributes) && migrate_db_rake
+        if chef(attributes)[:exit_code] == 0 && migrate_db_rake
           json(
             code: 200,
             body: nil
