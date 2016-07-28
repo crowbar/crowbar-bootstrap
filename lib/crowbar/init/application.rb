@@ -168,28 +168,6 @@ module Crowbar
           "/etc/apache2/conf.d"
         end
 
-        def cleanup_db_rake
-          logger.debug("Creating and migrating crowbar database")
-          Dir.chdir("/opt/dell/crowbar_framework") do
-            run_cmd(
-              { "RAILS_ENV" => "production" },
-              "bin/rake",
-              "db:cleanup"
-            )
-          end
-        end
-
-        def migrate_db_rake
-          logger.debug("Migrating crowbar database")
-          Dir.chdir("/opt/dell/crowbar_framework") do
-            run_cmd(
-              { "RAILS_ENV" => "production" },
-              "bin/rake",
-              "db:migrate"
-            )
-          end
-        end
-
         def crowbar_service(action)
           logger.debug("#{action.capitalize}ing crowbar service")
           run_cmd(
@@ -382,7 +360,7 @@ module Crowbar
         }
 
         logger.debug("Creating Crowbar database")
-        if chef(attributes)[:exit_code] == 0 && cleanup_db_rake
+        if chef(attributes)[:exit_code] == 0
           json(
             code: 200,
             body: nil
@@ -417,7 +395,7 @@ module Crowbar
         }
 
         logger.debug("Connecting Crowbar to external database")
-        if chef(attributes)[:exit_code] == 0 && migrate_db_rake
+        if chef(attributes)[:exit_code] == 0
           json(
             code: 200,
             body: nil
