@@ -1,6 +1,6 @@
 [Unit]
 Description=Crowbar Init
-After=network.target syslog.target remote-fs.target chef-server.service
+After=network.target syslog.target remote-fs.target
 Requires=apache2.service
 
 [Service]

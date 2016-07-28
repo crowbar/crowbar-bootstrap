@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-template node[:postgresql][:config] do
+template node[:postgresql][:config][:rails] do
   source "database.yml.erb"
   group "crowbar"
   owner "crowbar"
@@ -27,3 +27,17 @@ template node[:postgresql][:config] do
     port:      node[:postgresql][:port]
   )
 end
+
+template node[:postgresql][:config][:pg_hba] do
+  source "pg_hba.conf.erb"
+  group "postgres"
+  owner "postgres"
+  mode 0600
+  variables(
+    database:           node[:postgresql][:database],
+    username:           node[:postgresql][:username],
+    client_auth_method: node[:postgresql][:config][:client_auth_method],
+    host_auth_method:   node[:postgresql][:config][:host_auth_method]
+  )
+  notifies :restart, "service[postgresql]", :immediately
+end unless node[:postgresql][:remote]
