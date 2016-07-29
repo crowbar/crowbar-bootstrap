@@ -13,7 +13,7 @@ TimeoutStopSec=10
 
 Environment="RACK_ENV=production"
 
-ExecStart=/usr/bin/crowbar-init.ruby2.1
+ExecStart=/usr/bin/crowbar-init
 
 Restart=always
 
