@@ -30,7 +30,7 @@ gem "font-awesome-sass", ">= 4.5.0"
 gem "uglifier", ">= 2.7.2"
 gem "pg", "~> 0.17.1"
 
-unless ENV["PACKAGING"] && ENV["PACKAGING"] == "yes"
+unless ENV["CROWBAR_INIT_ENV"] && ENV["CROWBAR_INIT_ENV"] == "production"
   group :test do
     if ENV["CODECLIMATE_REPO_TOKEN"]
       gem "coveralls", require: false
