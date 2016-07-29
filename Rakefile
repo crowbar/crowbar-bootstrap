@@ -14,13 +14,6 @@
 # limitations under the License.
 #
 
-begin
-  require "bundler"
-  Bundler::GemHelper.install_tasks
-rescue LoadError
-  warn "Failed to load bundler tasks"
-end
-
 require "rubocop/rake_task"
 RuboCop::RakeTask.new(:rubocop) do |task|
   task.options = [
