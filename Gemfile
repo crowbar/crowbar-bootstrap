@@ -15,13 +15,41 @@
 #
 
 source "https://rubygems.org"
-gemspec
 
-group :test do
-  gem "simplecov", require: false
-  gem "coveralls", require: false
-  gem "codeclimate-test-reporter", require: false
-  gem "rubocop", require: false
+gem "chef", "~> 10.32.2"
+gem "puma", ">= 2.11.3"
+gem "sprockets-helpers", ">= 1.1.0"
+gem "tilt", ">= 1.4.1"
+gem "json", ">= 1.4.4", "<= 1.8.1"
+gem "sinatra", ">= 1.4.6"
+gem "sinatra-contrib", ">= 1.4.7"
+gem "haml", ">= 4.0.6"
+gem "sass", ">= 3.4.13"
+gem "bootstrap-sass", ">= 3.3.5"
+gem "font-awesome-sass", ">= 4.5.0"
+gem "uglifier", ">= 2.7.2"
+gem "pg", "~> 0.17.1"
+
+unless ENV["PACKAGING"] && ENV["PACKAGING"] == "yes"
+  group :test do
+    if ENV["CODECLIMATE_REPO_TOKEN"]
+      gem "coveralls", require: false
+      gem "codeclimate-test-reporter", require: false
+    end
+    gem "simplecov", require: false
+    gem "rubocop", require: false
+  end
+
+  group :development do
+    gem "bundler"
+    gem "rake"
+    gem "yard"
+    gem "rspec"
+    gem "webmock"
+    gem "listen", "<= 3.0.6"
+    gem "guard"
+    gem "guard-remote-sync"
+    gem "guard-rspec"
+    gem "guard-rubocop"
+  end
 end
-
-instance_eval(File.read("Gemfile.local")) if File.exist? "Gemfile.local"
