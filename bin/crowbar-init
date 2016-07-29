@@ -21,7 +21,12 @@ Signal.trap("INT") do
   abort
 end
 
-require_relative "../lib/crowbar-init.rb"
+begin
+  require "crowbar/init"
+rescue LoadError
+  require "rubygems"
+  require "crowbar/init"
+end
 
 begin
   Crowbar::Init::Application.run!
