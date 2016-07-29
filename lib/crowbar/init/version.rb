@@ -23,22 +23,12 @@ module Crowbar
       #
       # Major version
       #
-      MAJOR = 0
+      MAJOR = 4
 
       #
       # Minor version
       #
       MINOR = 0
-
-      #
-      # Patch version
-      #
-      PATCH = 1
-
-      #
-      # Optional suffix
-      #
-      PRE = nil
 
       class << self
         #
@@ -47,7 +37,7 @@ module Crowbar
         # @return [String] the version of Crowbar Init
         #
         def to_s
-          [MAJOR, MINOR, PATCH, PRE].compact.join(".")
+          [MAJOR, MINOR].compact.join(".")
         end
       end
     end
