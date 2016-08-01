@@ -14,24 +14,6 @@
 # limitations under the License.
 #
 
-require "sinatra/base"
-require "sinatra/json"
-require "sinatra/reloader"
-require "haml"
-require "tilt/haml"
-require "json"
-require "uri"
-require "net/http"
-require "sass"
-require "sprockets"
-require "sprockets-helpers"
-require "bootstrap-sass"
-require "font-awesome-sass"
-require "open3"
-require "pg"
-
-require "chef"
-
 module Crowbar
   module Init
     #
