@@ -26,7 +26,6 @@ gem "sinatra-contrib", ">= 1.4.7"
 gem "haml", ">= 4.0.6"
 gem "sass", ">= 3.4.13"
 gem "bootstrap-sass", ">= 3.3.5"
-gem "font-awesome-sass", ">= 4.5.0"
 gem "uglifier", ">= 2.7.2"
 gem "pg", "~> 0.17.1"
 

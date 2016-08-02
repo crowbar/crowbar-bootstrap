@@ -56,9 +56,6 @@ else
   gem "bootstrap-sass", version: ">= 3.3.5"
   require "bootstrap-sass"
 
-  gem "font-awesome-sass", version: ">= 4.5.0"
-  require "font-awesome-sass"
-
   gem "uglifier", version: ">= 2.7.2"
   require "uglifier"
 
