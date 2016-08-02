@@ -42,7 +42,6 @@ else
 
   gem "sinatra", version: ">= 1.4.6"
   require "sinatra/base"
-  require "sinatra/reloader"
 
   gem "sinatra-contrib", version: ">= 1.4.7"
   require "sinatra/json"
