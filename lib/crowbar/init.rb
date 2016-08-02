@@ -46,9 +46,6 @@ else
   gem "sinatra-contrib", version: ">= 1.4.7"
   require "sinatra/json"
 
-  gem "haml", version: ">= 4.0.6"
-  require "haml"
-
   gem "sass", version: ">= 3.4.13"
   require "sass"
 
