@@ -86,7 +86,7 @@ group :tree do
   ]
 
   guard "remote-sync", sync_on_start: true, source: ".", cli_options: config_params.join(" ") do
-    watch(/\A*\/.+/)
+    watch(/.*/)
   end
 end
 
