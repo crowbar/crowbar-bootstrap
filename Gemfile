@@ -39,6 +39,7 @@ unless ENV["CROWBAR_INIT_ENV"] && ENV["CROWBAR_INIT_ENV"] == "production"
   end
 
   group :development do
+    gem "byebug"
     gem "bundler"
     gem "rake"
     gem "yard"
