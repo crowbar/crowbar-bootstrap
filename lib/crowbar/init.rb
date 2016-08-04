@@ -22,7 +22,7 @@ require "open3"
 
 if File.exist? ENV["CURRENT_GEMFILE"]
   require "bundler"
-  Bundler.setup(:default)
+  Bundler.require(:default)
 else
   gem "chef", version: "~> 10.32.2"
   require "chef"
