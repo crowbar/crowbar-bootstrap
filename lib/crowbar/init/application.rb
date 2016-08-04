@@ -220,7 +220,12 @@ module Crowbar
       end
 
       get "/" do
-        haml :index
+        status = {
+          code: 501,
+          body: nil
+        }
+
+        json(status)
       end
 
       # api :POST, "Initialize Crowbar"

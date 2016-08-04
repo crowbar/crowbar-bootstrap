@@ -23,10 +23,8 @@ gem "tilt", ">= 1.4.1"
 gem "json", ">= 1.4.4", "<= 1.8.1"
 gem "sinatra", ">= 1.4.6"
 gem "sinatra-contrib", ">= 1.4.7"
-gem "haml", ">= 4.0.6"
 gem "sass", ">= 3.4.13"
 gem "bootstrap-sass", ">= 3.3.5"
-gem "font-awesome-sass", ">= 4.5.0"
 gem "uglifier", ">= 2.7.2"
 gem "pg", "~> 0.17.1"
 
@@ -41,6 +39,7 @@ unless ENV["CROWBAR_INIT_ENV"] && ENV["CROWBAR_INIT_ENV"] == "production"
   end
 
   group :development do
+    gem "byebug"
     gem "bundler"
     gem "rake"
     gem "yard"

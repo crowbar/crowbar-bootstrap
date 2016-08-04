@@ -22,7 +22,7 @@ require "open3"
 
 if File.exist? ENV["CURRENT_GEMFILE"]
   require "bundler"
-  Bundler.setup(:default)
+  Bundler.require(:default)
 else
   gem "chef", version: "~> 10.32.2"
   require "chef"
@@ -42,22 +42,15 @@ else
 
   gem "sinatra", version: ">= 1.4.6"
   require "sinatra/base"
-  require "sinatra/reloader"
 
   gem "sinatra-contrib", version: ">= 1.4.7"
   require "sinatra/json"
-
-  gem "haml", version: ">= 4.0.6"
-  require "haml"
 
   gem "sass", version: ">= 3.4.13"
   require "sass"
 
   gem "bootstrap-sass", version: ">= 3.3.5"
   require "bootstrap-sass"
-
-  gem "font-awesome-sass", version: ">= 4.5.0"
-  require "font-awesome-sass"
 
   gem "uglifier", version: ">= 2.7.2"
   require "uglifier"
