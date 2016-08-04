@@ -14,6 +14,6 @@
 # limitations under the License.
 #
 
-require_relative "lib/crowbar-init.rb"
+require_relative "lib/crowbar-init"
 
 run Crowbar::Init::Application
