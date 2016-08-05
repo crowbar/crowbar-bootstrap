@@ -150,6 +150,10 @@ module Crowbar
           "/etc/apache2/conf.d"
         end
 
+        def crowbar_framework_path
+          "/opt/dell/crowbar_framework"
+        end
+
         def crowbar_service(action)
           logger.debug("#{action.capitalize}ing crowbar service")
           run_cmd(
@@ -230,6 +234,19 @@ module Crowbar
 
           halt 406, { "Content-Type" => "application/vnd.crowbar.v#{major}.#{minor}+json" }, ""
         end
+      end
+
+      def migrate_database
+        ["data.yml", "schema.rb"].each do |file|
+          next if File.exist?("#{crowbar_framework_path}/db/#{file}")
+          logger.debug("Could not find #{crowbar_framework_path}/db/#{dbfile}")
+          return false
+        end
+
+        cmd = run_cmd("cd /opt/dell/crowbar_framework && RAILS_ENV=production bin/rake db:load")
+        return true if cmd[:exit_code] == 0
+
+        false
       end
 
       get "/" do
@@ -418,6 +435,24 @@ module Crowbar
             code: 500,
             body: {
               error: "Could not connect to database. Please have a look at /var/log/chef/solo.log"
+            }
+          )
+        end
+      end
+
+      # api :POST, "Migrate the sqlite database to postgresql"
+      post "/database/migrate" do
+        api_constraint(2.0)
+        if migrate_database
+          json(
+            code: 200,
+            body: nil
+          )
+        else
+          json(
+            code: 500,
+            body: {
+              error: "Could not migrate crowbar database to postgresql."
             }
           )
         end
