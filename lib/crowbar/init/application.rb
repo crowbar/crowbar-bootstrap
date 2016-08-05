@@ -217,9 +217,21 @@ module Crowbar
             }
           end
         end
+
+        def api_version(version)
+          major, minor = version.to_s.split(".").map(&:to_i)
+          version_mime = %r(^application/vnd\.crowbar-init\.v(?<major>\d+).(?<minor>\d+)\+json$)
+
+          versions = version_mime.match(request.accept.first.entry)
+          return true if versions &&
+              versions[:major].to_i == major &&
+              versions[:minor].to_i == minor
+          halt 406, { "Content-Type" => "application/vnd.crowbar-init.v#{major}.#{minor}+json" }, ""
+        end
       end
 
       get "/" do
+        api_version(1.0)
         status = {
           code: 501,
           body: nil
@@ -229,7 +241,9 @@ module Crowbar
       end
 
       # api :POST, "Initialize Crowbar"
+      # api_version "1.0"
       post "/init" do
+        api_version(1.0)
         status = {
           code: 200,
           body: nil
@@ -260,7 +274,9 @@ module Crowbar
       end
 
       # api :POST, "Reset Crowbar"
+      # api_version "1.0"
       post "/reset" do
+        api_version(1.0)
         status = {
           code: 200,
           body: nil
@@ -290,7 +306,9 @@ module Crowbar
       end
 
       # api :GET, "Crowbar status"
+      # api_version "1.0"
       get "/status" do
+        api_version(1.0)
         json crowbar_status(:json)
       end
 
@@ -300,7 +318,9 @@ module Crowbar
       # param :database, String, desc: "Database name"
       # param :host, String, desc: "External database host"
       # param :port, Integer, desc: "External database port"
+      # api_version "1.0"
       post "/database/test" do
+        api_version(1.0)
         attributes = {
           username: params[:username] || "crowbar",
           password: params[:password] || "crowbar",
@@ -337,7 +357,9 @@ module Crowbar
       # api :POST, "Create a new Crowbar database"
       # param :username, String, desc: "Username"
       # param :password, String, desc: "Password"
+      # api_version "1.0"
       post "/database/new" do
+        api_version(1.0)
         attributes = {
           postgresql: {
             username: params[:username],
@@ -368,7 +390,9 @@ module Crowbar
       # param :database, String, desc: "Database name"
       # param :host, String, desc: "External database host"
       # param :port, Integer, desc: "External database port"
+      # api_version "1.0"
       post "/database/connect" do
+        api_version(1.0)
         attributes = {
           postgresql: {
             username: params[:username],
