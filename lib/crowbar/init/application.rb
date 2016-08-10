@@ -85,7 +85,9 @@ module Crowbar
               "-o '#{run_list}'"
             ].join(" ")
 
-            run_cmd(cmd)
+            return true if run_cmd(cmd)[:exit_code] == 0
+
+            false
           end
         end
 
@@ -388,7 +390,7 @@ module Crowbar
         }
 
         logger.debug("Creating Crowbar database")
-        if chef(attributes)[:exit_code] == 0
+        if chef(attributes)
           json(
             code: 200,
             body: nil
@@ -425,7 +427,7 @@ module Crowbar
         }
 
         logger.debug("Connecting Crowbar to external database")
-        if chef(attributes)[:exit_code] == 0
+        if chef(attributes)
           json(
             code: 200,
             body: nil
