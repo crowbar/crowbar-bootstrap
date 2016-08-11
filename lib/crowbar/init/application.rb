@@ -85,7 +85,9 @@ module Crowbar
               "-o '#{run_list}'"
             ].join(" ")
 
-            run_cmd(cmd)
+            return true if run_cmd(cmd)[:exit_code] == 0
+
+            false
           end
         end
 
@@ -148,6 +150,10 @@ module Crowbar
 
         def crowbar_apache_path
           "/etc/apache2/conf.d"
+        end
+
+        def crowbar_framework_path
+          "/opt/dell/crowbar_framework"
         end
 
         def crowbar_service(action)
@@ -230,6 +236,19 @@ module Crowbar
 
           halt 406, { "Content-Type" => "application/vnd.crowbar.v#{major}.#{minor}+json" }, ""
         end
+      end
+
+      def migrate_database
+        ["data.yml", "schema.rb"].each do |file|
+          next if File.exist?("#{crowbar_framework_path}/db/#{file}")
+          logger.debug("Could not find #{crowbar_framework_path}/db/#{dbfile}")
+          return false
+        end
+
+        cmd = run_cmd("cd /opt/dell/crowbar_framework && RAILS_ENV=production bin/rake db:load")
+        return true if cmd[:exit_code] == 0
+
+        false
       end
 
       get "/" do
@@ -371,7 +390,7 @@ module Crowbar
         }
 
         logger.debug("Creating Crowbar database")
-        if chef(attributes)[:exit_code] == 0
+        if chef(attributes)
           json(
             code: 200,
             body: nil
@@ -408,7 +427,7 @@ module Crowbar
         }
 
         logger.debug("Connecting Crowbar to external database")
-        if chef(attributes)[:exit_code] == 0
+        if chef(attributes)
           json(
             code: 200,
             body: nil
@@ -418,6 +437,24 @@ module Crowbar
             code: 500,
             body: {
               error: "Could not connect to database. Please have a look at /var/log/chef/solo.log"
+            }
+          )
+        end
+      end
+
+      # api :POST, "Migrate the sqlite database to postgresql"
+      post "/database/migrate" do
+        api_constraint(2.0)
+        if migrate_database
+          json(
+            code: 200,
+            body: nil
+          )
+        else
+          json(
+            code: 500,
+            body: {
+              error: "Could not migrate crowbar database to postgresql."
             }
           )
         end
