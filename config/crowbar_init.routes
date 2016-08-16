@@ -1,1 +1,1 @@
-mount Crowbar::Init::Application.new => "/api/v2/init"
+mount Crowbar::Init::Application.new => "/api/init"
