@@ -230,6 +230,7 @@ module Crowbar
             version_mime = %r(^application/vnd\.crowbar\.v(?<major>\d+).(?<minor>\d+)\+json$)
 
             versions_requested = version_mime.match(request.accept.first.entry)
+            break if versions_requested.nil?
             return true if versions_requested[:major].to_i == major &&
                 versions_requested[:minor].to_i <= minor
           end
