@@ -30,6 +30,10 @@ module Crowbar
       set :assets_prefix, "/assets"
       set :digest_assets, false
 
+      if ENV["RAILS_ENV"] && !ENV["RACK_ENV"]
+        set :environment, ENV["RAILS_ENV"]
+      end
+
       before do
         logger.level = Logger::DEBUG
       end
