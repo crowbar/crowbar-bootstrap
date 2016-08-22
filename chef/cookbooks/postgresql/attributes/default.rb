@@ -16,8 +16,10 @@
 
 default[:postgresql][:config][:rails] = "/opt/dell/crowbar_framework/config/database.yml"
 default[:postgresql][:config][:pg_hba] = "/var/lib/pgsql/data/pg_hba.conf"
+default[:postgresql][:config][:postgresql] = "/var/lib/pgsql/data/postgresql.conf"
 default[:postgresql][:config][:client_auth_method] = "trust"
 default[:postgresql][:config][:host_auth_method] = "trust"
+default[:postgresql][:config][:log_destination] = "syslog"
 default[:postgresql][:remote] = false
 default[:postgresql][:host] = "localhost"
 default[:postgresql][:port] = "5432"
