@@ -246,7 +246,7 @@ module Crowbar
       def migrate_database
         ["data.yml", "schema.rb"].each do |file|
           next if File.exist?("#{crowbar_framework_path}/db/#{file}")
-          logger.debug("Could not find #{crowbar_framework_path}/db/#{dbfile}")
+          logger.debug("Could not find #{crowbar_framework_path}/db/#{file}")
           return false
         end
 
