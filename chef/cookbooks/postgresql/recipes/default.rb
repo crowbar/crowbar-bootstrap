@@ -22,7 +22,14 @@ else
 end
 
 service "postgresql" do
-  action [:enable, :start]
+  action [:start]
+end
+
+# workaround for not being able to enable postgresql via chef service
+# probably related bug: https://bugzilla.suse.com/show_bug.cgi?id=994875
+bash "enable postgresql" do
+  code "sudo systemctl enable postgresql"
+  not_if { `chkconfig postgresql` =~ /^postgresql.*on\n$/ }
 end
 
 include_recipe "postgresql::config"
