@@ -256,6 +256,16 @@ module Crowbar
         false
       end
 
+      def migrate_crowbar
+        cmd = run_cmd(
+          "cd /opt/dell/crowbar_framework && " \
+          "RAILS_ENV=production bin/rake crowbar:schema_migrate_prod"
+        )
+        return true if cmd[:exit_code] == 0
+
+        false
+      end
+
       get "/" do
         api_constraint(2.0)
         status = {
@@ -329,6 +339,24 @@ module Crowbar
         end
 
         json(status)
+      end
+
+      # api :POST, "Migrate crowbar schemas"
+      post "/migrate" do
+        api_constraint(2.0)
+        if migrate_crowbar
+          json(
+            code: 200,
+            body: nil
+          )
+        else
+          json(
+            code: 500,
+            body: {
+              error: "Could not migrate crowbar schemas to newest version."
+            }
+          )
+        end
       end
 
       # api :GET, "Crowbar status"
