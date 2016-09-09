@@ -41,3 +41,14 @@ template node[:postgresql][:config][:pg_hba] do
   )
   notifies :restart, "service[postgresql]", :immediately
 end unless node[:postgresql][:remote]
+
+template node[:postgresql][:config][:postgresql] do
+  source "postgresql.conf.erb"
+  group "postgres"
+  owner "postgres"
+  mode 0600
+  variables(
+    log_destination:   node[:postgresql][:config][:log_destination]
+  )
+  notifies :restart, "service[postgresql]", :immediately
+end unless node[:postgresql][:remote]
