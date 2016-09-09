@@ -89,7 +89,7 @@ module Crowbar
               "-o '#{run_list}'"
             ].join(" ")
 
-            return true if run_cmd(cmd)[:exit_code] == 0
+            return true if run_cmd(cmd)[:exit_code].zero?
 
             false
           end
@@ -250,7 +250,7 @@ module Crowbar
           end
 
           cmd = run_cmd("cd /opt/dell/crowbar_framework && RAILS_ENV=production bin/rake db:load")
-          return true if cmd[:exit_code] == 0
+          return true if cmd[:exit_code].zero?
 
           false
         end
@@ -260,7 +260,7 @@ module Crowbar
             "cd /opt/dell/crowbar_framework && " \
             "RAILS_ENV=production bin/rake crowbar:schema_migrate_prod"
           )
-          return true if cmd[:exit_code] == 0
+          return true if cmd[:exit_code].zero?
 
           false
         end
@@ -278,7 +278,7 @@ module Crowbar
             [:wait_for_crowbar]
           ].each do |command|
             cmd_ret = send(*command)
-            next if cmd_ret[:exit_code] == 0
+            next if cmd_ret[:exit_code].zero?
 
             message = if cmd_ret[:stdout].nil? || cmd_ret[:stdout].empty?
               cmd_ret[:stderr]
@@ -309,7 +309,7 @@ module Crowbar
             [:reload_apache]
           ].each do |command|
             cmd_ret = send(*command)
-            next if cmd_ret[:exit_code] == 0
+            next if cmd_ret[:exit_code].zero?
 
             message = if cmd_ret[:stdout].nil? || cmd_ret[:stdout].empty?
               cmd_ret[:stderr]
@@ -403,7 +403,7 @@ module Crowbar
 
         logger.debug("Testing connectivity to database")
         begin
-          if test_db_connection(attributes) == 0
+          if test_db_connection(attributes).zero?
             json(
               code: 200,
               body: nil
