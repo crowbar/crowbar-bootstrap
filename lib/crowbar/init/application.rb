@@ -511,6 +511,95 @@ module Crowbar
         end
       end
 
+      # api :POST, "Initialization during upgrade with creation of a new database"
+      # param :username, String, desc: "Username"
+      # param :password, String, desc: "Password"
+      # api_version "2.0"
+      post "/upgrade/new" do
+        api_constraint(2.0)
+        attributes = {
+          postgresql: {
+            username: params[:username],
+            password: params[:password]
+          },
+          run_list: ["recipe[postgresql::default]"]
+        }
+
+        result = {
+          database_setup: {
+            success: chef(attributes)
+          },
+          database_migration: {
+            success: migrate_database
+          },
+          schema_migration: {
+            success: migrate_crowbar
+          }
+        }
+
+        init = crowbar_init
+        result[:crowbar_init] = {
+          success: init[:code] == 200
+        }
+
+        result[:crowbar_init][:body] = init[:body] if init[:body]
+
+        json(
+          result
+        )
+      end
+
+      # api :POST, "Initialization during upgrade with connection to an existing database"
+      # param :username, String, desc: "External database username"
+      # param :password, String, desc: "External database password"
+      # param :database, String, desc: "Database name"
+      # param :host, String, desc: "External database host"
+      # param :port, Integer, desc: "External database port"
+      # api_version "2.0"
+      post "/upgrade/connect" do
+        api_constraint(2.0)
+        attributes = {
+          postgresql: {
+            username: params[:username],
+            password: params[:password],
+            database: params[:database],
+            host: params[:host],
+            port: params[:port],
+            remote: true
+          },
+          run_list: ["recipe[postgresql::config]"]
+        }
+
+        begin
+          test_db_connection(attributes[:postgresql])
+        rescue PG::ConnectionBad => e
+          halt 406, {}, e.message
+        end
+
+        result = {
+          database_setup: {
+            success: chef(attributes)
+          },
+          database_migration: {
+            success: migrate_database
+          },
+          schema_migration: {
+            success: migrate_crowbar
+          }
+        }
+
+        init = crowbar_init
+        result[:crowbar_init] = {
+          success: init[:code] == 200
+        }
+
+        result[:crowbar_init][:body] = init[:body] if init[:body]
+
+        json(
+          result
+        )
+      end
+
       # internal API endpoint
       get "/assets/*" do
         settings.sprockets.call(
