@@ -290,6 +290,8 @@ module Crowbar
             status[:body] = {
               error: "#{command.inspect}: #{message}"
             }
+
+            break
           end
 
           status
@@ -319,6 +321,8 @@ module Crowbar
             status[:body] = {
               error: message
             }
+
+            break
           end
 
           status
