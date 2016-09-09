@@ -241,29 +241,29 @@ module Crowbar
 
           halt 406, { "Content-Type" => "application/vnd.crowbar.v#{major}.#{minor}+json" }, ""
         end
-      end
 
-      def migrate_database
-        ["data.yml", "schema.rb"].each do |file|
-          next if File.exist?("#{crowbar_framework_path}/db/#{file}")
-          logger.debug("Could not find #{crowbar_framework_path}/db/#{file}")
-          return false
+        def migrate_database
+          ["data.yml", "schema.rb"].each do |file|
+            next if File.exist?("#{crowbar_framework_path}/db/#{file}")
+            logger.debug("Could not find #{crowbar_framework_path}/db/#{file}")
+            return false
+          end
+
+          cmd = run_cmd("cd /opt/dell/crowbar_framework && RAILS_ENV=production bin/rake db:load")
+          return true if cmd[:exit_code] == 0
+
+          false
         end
 
-        cmd = run_cmd("cd /opt/dell/crowbar_framework && RAILS_ENV=production bin/rake db:load")
-        return true if cmd[:exit_code] == 0
+        def migrate_crowbar
+          cmd = run_cmd(
+            "cd /opt/dell/crowbar_framework && " \
+            "RAILS_ENV=production bin/rake crowbar:schema_migrate_prod"
+          )
+          return true if cmd[:exit_code] == 0
 
-        false
-      end
-
-      def migrate_crowbar
-        cmd = run_cmd(
-          "cd /opt/dell/crowbar_framework && " \
-          "RAILS_ENV=production bin/rake crowbar:schema_migrate_prod"
-        )
-        return true if cmd[:exit_code] == 0
-
-        false
+          false
+        end
       end
 
       get "/" do
