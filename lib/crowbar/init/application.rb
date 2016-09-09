@@ -264,6 +264,65 @@ module Crowbar
 
           false
         end
+
+        def crowbar_init
+          status = {
+            code: 200,
+            body: nil
+          }
+
+          [
+            [:crowbar_service, :start],
+            [:symlink_apache_to, :rails],
+            [:reload_apache],
+            [:wait_for_crowbar]
+          ].each do |command|
+            cmd_ret = send(*command)
+            next if cmd_ret[:exit_code] == 0
+
+            message = if cmd_ret[:stdout].nil? || cmd_ret[:stdout].empty?
+              cmd_ret[:stderr]
+            else
+              cmd_ret[:stdout]
+            end
+
+            status[:code] = 500
+            status[:body] = {
+              error: "#{command.inspect}: #{message}"
+            }
+          end
+
+          status
+        end
+
+        def crowbar_reset
+          status = {
+            code: 200,
+            body: nil
+          }
+
+          [
+            [:crowbar_service, :stop],
+            [:symlink_apache_to, :sinatra],
+            [:reload_apache]
+          ].each do |command|
+            cmd_ret = send(*command)
+            next if cmd_ret[:exit_code] == 0
+
+            message = if cmd_ret[:stdout].nil? || cmd_ret[:stdout].empty?
+              cmd_ret[:stderr]
+            else
+              cmd_ret[:stdout]
+            end
+
+            status[:code] = 500
+            status[:body] = {
+              error: message
+            }
+          end
+
+          status
+        end
       end
 
       get "/" do
@@ -280,65 +339,20 @@ module Crowbar
       # api_version "2.0"
       post "/init" do
         api_constraint(2.0)
-        status = {
-          code: 200,
-          body: nil
-        }
 
-        [
-          [:crowbar_service, :start],
-          [:symlink_apache_to, :rails],
-          [:reload_apache],
-          [:wait_for_crowbar]
-        ].each do |command|
-          cmd_ret = send(*command)
-          next if cmd_ret[:exit_code] == 0
-
-          message = if cmd_ret[:stdout].nil? || cmd_ret[:stdout].empty?
-            cmd_ret[:stderr]
-          else
-            cmd_ret[:stdout]
-          end
-
-          status[:code] = 500
-          status[:body] = {
-            error: "#{command.inspect}: #{message}"
-          }
-        end
-
-        json(status)
+        json(
+          crowbar_init
+        )
       end
 
       # api :POST, "Reset Crowbar"
       # api_version "2.0"
       post "/reset" do
         api_constraint(2.0)
-        status = {
-          code: 200,
-          body: nil
-        }
 
-        [
-          [:crowbar_service, :stop],
-          [:symlink_apache_to, :sinatra],
-          [:reload_apache]
-        ].each do |command|
-          cmd_ret = send(*command)
-          next if cmd_ret[:exit_code] == 0
-
-          message = if cmd_ret[:stdout].nil? || cmd_ret[:stdout].empty?
-            cmd_ret[:stderr]
-          else
-            cmd_ret[:stdout]
-          end
-
-          status[:code] = 500
-          status[:body] = {
-            error: message
-          }
-        end
-
-        json(status)
+        json(
+          crowbar_reset
+        )
       end
 
       # api :POST, "Migrate crowbar schemas"
