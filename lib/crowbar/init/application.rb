@@ -403,7 +403,7 @@ module Crowbar
 
         logger.debug("Testing connectivity to database")
         begin
-          if test_db_connection(attributes)
+          if test_db_connection(attributes) == 0
             json(
               code: 200,
               body: nil
@@ -416,11 +416,11 @@ module Crowbar
               }
             )
           end
-        rescue => e
+        rescue PG::ConnectionBad => e
           json(
-            code: 500,
+            code: 406,
             body: {
-              error: e.message.inspect
+              error: e.message
             }
           )
         end
