@@ -89,7 +89,7 @@ module Crowbar
               "-o '#{run_list}'"
             ].join(" ")
 
-            return true if run_cmd(cmd)[:exit_code] == 0
+            return true if run_cmd(cmd)[:exit_code].zero?
 
             false
           end
@@ -241,29 +241,92 @@ module Crowbar
 
           halt 406, { "Content-Type" => "application/vnd.crowbar.v#{major}.#{minor}+json" }, ""
         end
-      end
 
-      def migrate_database
-        ["data.yml", "schema.rb"].each do |file|
-          next if File.exist?("#{crowbar_framework_path}/db/#{file}")
-          logger.debug("Could not find #{crowbar_framework_path}/db/#{file}")
-          return false
+        def migrate_database
+          ["data.yml", "schema.rb"].each do |file|
+            next if File.exist?("#{crowbar_framework_path}/db/#{file}")
+            logger.debug("Could not find #{crowbar_framework_path}/db/#{file}")
+            return false
+          end
+
+          cmd = run_cmd("cd /opt/dell/crowbar_framework && RAILS_ENV=production bin/rake db:load")
+          return true if cmd[:exit_code].zero?
+
+          false
         end
 
-        cmd = run_cmd("cd /opt/dell/crowbar_framework && RAILS_ENV=production bin/rake db:load")
-        return true if cmd[:exit_code] == 0
+        def migrate_crowbar
+          cmd = run_cmd(
+            "cd /opt/dell/crowbar_framework && " \
+            "RAILS_ENV=production bin/rake crowbar:schema_migrate_prod"
+          )
+          return true if cmd[:exit_code].zero?
 
-        false
-      end
+          false
+        end
 
-      def migrate_crowbar
-        cmd = run_cmd(
-          "cd /opt/dell/crowbar_framework && " \
-          "RAILS_ENV=production bin/rake crowbar:schema_migrate_prod"
-        )
-        return true if cmd[:exit_code] == 0
+        def crowbar_init
+          status = {
+            code: 200,
+            body: nil
+          }
 
-        false
+          [
+            [:crowbar_service, :start],
+            [:symlink_apache_to, :rails],
+            [:reload_apache],
+            [:wait_for_crowbar]
+          ].each do |command|
+            cmd_ret = send(*command)
+            next if cmd_ret[:exit_code].zero?
+
+            message = if cmd_ret[:stdout].nil? || cmd_ret[:stdout].empty?
+              cmd_ret[:stderr]
+            else
+              cmd_ret[:stdout]
+            end
+
+            status[:code] = 500
+            status[:body] = {
+              error: "#{command.inspect}: #{message}"
+            }
+
+            break
+          end
+
+          status
+        end
+
+        def crowbar_reset
+          status = {
+            code: 200,
+            body: nil
+          }
+
+          [
+            [:crowbar_service, :stop],
+            [:symlink_apache_to, :sinatra],
+            [:reload_apache]
+          ].each do |command|
+            cmd_ret = send(*command)
+            next if cmd_ret[:exit_code].zero?
+
+            message = if cmd_ret[:stdout].nil? || cmd_ret[:stdout].empty?
+              cmd_ret[:stderr]
+            else
+              cmd_ret[:stdout]
+            end
+
+            status[:code] = 500
+            status[:body] = {
+              error: message
+            }
+
+            break
+          end
+
+          status
+        end
       end
 
       get "/" do
@@ -280,65 +343,20 @@ module Crowbar
       # api_version "2.0"
       post "/init" do
         api_constraint(2.0)
-        status = {
-          code: 200,
-          body: nil
-        }
 
-        [
-          [:crowbar_service, :start],
-          [:symlink_apache_to, :rails],
-          [:reload_apache],
-          [:wait_for_crowbar]
-        ].each do |command|
-          cmd_ret = send(*command)
-          next if cmd_ret[:exit_code] == 0
-
-          message = if cmd_ret[:stdout].nil? || cmd_ret[:stdout].empty?
-            cmd_ret[:stderr]
-          else
-            cmd_ret[:stdout]
-          end
-
-          status[:code] = 500
-          status[:body] = {
-            error: "#{command.inspect}: #{message}"
-          }
-        end
-
-        json(status)
+        json(
+          crowbar_init
+        )
       end
 
       # api :POST, "Reset Crowbar"
       # api_version "2.0"
       post "/reset" do
         api_constraint(2.0)
-        status = {
-          code: 200,
-          body: nil
-        }
 
-        [
-          [:crowbar_service, :stop],
-          [:symlink_apache_to, :sinatra],
-          [:reload_apache]
-        ].each do |command|
-          cmd_ret = send(*command)
-          next if cmd_ret[:exit_code] == 0
-
-          message = if cmd_ret[:stdout].nil? || cmd_ret[:stdout].empty?
-            cmd_ret[:stderr]
-          else
-            cmd_ret[:stdout]
-          end
-
-          status[:code] = 500
-          status[:body] = {
-            error: message
-          }
-        end
-
-        json(status)
+        json(
+          crowbar_reset
+        )
       end
 
       # api :POST, "Migrate crowbar schemas"
@@ -385,7 +403,7 @@ module Crowbar
 
         logger.debug("Testing connectivity to database")
         begin
-          if test_db_connection(attributes)
+          if test_db_connection(attributes).zero?
             json(
               code: 200,
               body: nil
@@ -398,11 +416,11 @@ module Crowbar
               }
             )
           end
-        rescue => e
+        rescue PG::ConnectionBad => e
           json(
-            code: 500,
+            code: 406,
             body: {
-              error: e.message.inspect
+              error: e.message
             }
           )
         end
@@ -491,6 +509,95 @@ module Crowbar
             }
           )
         end
+      end
+
+      # api :POST, "Initialization during upgrade with creation of a new database"
+      # param :username, String, desc: "Username"
+      # param :password, String, desc: "Password"
+      # api_version "2.0"
+      post "/upgrade/new" do
+        api_constraint(2.0)
+        attributes = {
+          postgresql: {
+            username: params[:username],
+            password: params[:password]
+          },
+          run_list: ["recipe[postgresql::default]"]
+        }
+
+        result = {
+          database_setup: {
+            success: chef(attributes)
+          },
+          database_migration: {
+            success: migrate_database
+          },
+          schema_migration: {
+            success: migrate_crowbar
+          }
+        }
+
+        init = crowbar_init
+        result[:crowbar_init] = {
+          success: init[:code] == 200
+        }
+
+        result[:crowbar_init][:body] = init[:body] if init[:body]
+
+        json(
+          result
+        )
+      end
+
+      # api :POST, "Initialization during upgrade with connection to an existing database"
+      # param :username, String, desc: "External database username"
+      # param :password, String, desc: "External database password"
+      # param :database, String, desc: "Database name"
+      # param :host, String, desc: "External database host"
+      # param :port, Integer, desc: "External database port"
+      # api_version "2.0"
+      post "/upgrade/connect" do
+        api_constraint(2.0)
+        attributes = {
+          postgresql: {
+            username: params[:username],
+            password: params[:password],
+            database: params[:database],
+            host: params[:host],
+            port: params[:port],
+            remote: true
+          },
+          run_list: ["recipe[postgresql::config]"]
+        }
+
+        begin
+          test_db_connection(attributes[:postgresql])
+        rescue PG::ConnectionBad => e
+          halt 406, {}, e.message
+        end
+
+        result = {
+          database_setup: {
+            success: chef(attributes)
+          },
+          database_migration: {
+            success: migrate_database
+          },
+          schema_migration: {
+            success: migrate_crowbar
+          }
+        }
+
+        init = crowbar_init
+        result[:crowbar_init] = {
+          success: init[:code] == 200
+        }
+
+        result[:crowbar_init][:body] = init[:body] if init[:body]
+
+        json(
+          result
+        )
       end
 
       # internal API endpoint
