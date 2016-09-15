@@ -170,6 +170,30 @@ module Crowbar
           )
         end
 
+        def shutdown_crowbar_init
+          logger.debug("Shutting down crowbar-init service")
+          cmd_ret = run_cmd(
+            "sudo",
+            "systemctl",
+            "disable",
+            "crowbar-init.service"
+          )
+          return cmd_ret unless cmd_ret[:exit_code].zero?
+
+          Thread.new do
+            # wait a bit to let the API request come back with 200
+            sleep 10
+            cmd_ret = run_cmd(
+              "sudo",
+              "systemctl",
+              "stop",
+              "crowbar-init.service"
+            )
+          end
+
+          cmd_ret
+        end
+
         def crowbar_status(request_type = :html)
           uri = if request_type == :html
             URI.parse(installer_url)
@@ -275,7 +299,8 @@ module Crowbar
             [:crowbar_service, :start],
             [:symlink_apache_to, :rails],
             [:reload_apache],
-            [:wait_for_crowbar]
+            [:wait_for_crowbar],
+            [:shutdown_crowbar_init]
           ].each do |command|
             cmd_ret = send(*command)
             next if cmd_ret[:exit_code].zero?
