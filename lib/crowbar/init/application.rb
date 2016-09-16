@@ -290,7 +290,7 @@ module Crowbar
         end
 
         def crowbar_init
-          status = {
+          ret = {
             code: 200,
             body: nil
           }
@@ -311,19 +311,19 @@ module Crowbar
               cmd_ret[:stdout]
             end
 
-            status[:code] = 500
-            status[:body] = {
+            ret[:code] = 500
+            ret[:body] = {
               error: "#{command.inspect}: #{message}"
             }
 
             break
           end
 
-          status
+          ret
         end
 
         def crowbar_reset
-          status = {
+          ret = {
             code: 200,
             body: nil
           }
@@ -342,26 +342,29 @@ module Crowbar
               cmd_ret[:stdout]
             end
 
-            status[:code] = 500
-            status[:body] = {
+            ret[:code] = 500
+            ret[:body] = {
               error: message
             }
 
             break
           end
 
-          status
+          ret
         end
       end
 
       get "/" do
         api_constraint(2.0)
-        status = {
+        ret = {
           code: 501,
           body: nil
         }
 
-        json(status)
+        status 501
+        json(
+          ret
+        )
       end
 
       # api :POST, "Initialize Crowbar"
@@ -369,8 +372,11 @@ module Crowbar
       post "/init" do
         api_constraint(2.0)
 
+        init = crowbar_init
+
+        status init[:code]
         json(
-          crowbar_init
+          init
         )
       end
 
@@ -379,8 +385,11 @@ module Crowbar
       post "/reset" do
         api_constraint(2.0)
 
+        reset = crowbar_reset
+
+        status reset[:code]
         json(
-          crowbar_reset
+          reset
         )
       end
 
@@ -393,6 +402,7 @@ module Crowbar
             body: nil
           )
         else
+          status 500
           json(
             code: 500,
             body: {
@@ -406,7 +416,17 @@ module Crowbar
       # api_version "2.0"
       get "/status" do
         api_constraint(2.0)
-        json crowbar_status(:json)
+        ret = {
+          code: 200,
+          body: {
+            crowbar: crowbar_status(:json)
+          }
+        }
+
+        status ret[:code]
+        json(
+          ret
+        )
       end
 
       # api :POST, "Create a new Crowbar database"
@@ -434,6 +454,7 @@ module Crowbar
               body: nil
             )
           else
+            status 503
             json(
               code: 503,
               body: {
@@ -442,6 +463,7 @@ module Crowbar
             )
           end
         rescue PG::ConnectionBad => e
+          status 406
           json(
             code: 406,
             body: {
@@ -472,6 +494,7 @@ module Crowbar
             body: nil
           )
         else
+          status 500
           json(
             code: 500,
             body: {
@@ -509,6 +532,7 @@ module Crowbar
             body: nil
           )
         else
+          status 500
           json(
             code: 500,
             body: {
@@ -527,6 +551,7 @@ module Crowbar
             body: nil
           )
         else
+          status 500
           json(
             code: 500,
             body: {
@@ -569,6 +594,7 @@ module Crowbar
 
         result[:crowbar_init][:body] = init[:body] if init[:body]
 
+        status init[:code]
         json(
           result
         )
@@ -620,6 +646,7 @@ module Crowbar
 
         result[:crowbar_init][:body] = init[:body] if init[:body]
 
+        status init[:code]
         json(
           result
         )
