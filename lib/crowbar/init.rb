@@ -67,6 +67,9 @@ module Crowbar
     autoload :Application,
       File.expand_path("../init/application", __FILE__)
 
+    autoload :Helpers,
+      File.expand_path("../init/helpers", __FILE__)
+
     autoload :Version,
       File.expand_path("../init/version", __FILE__)
   end
