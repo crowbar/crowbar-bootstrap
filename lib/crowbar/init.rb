@@ -30,13 +30,6 @@ else
   gem "puma", version: ">= 2.11.3"
   require "puma"
 
-  gem "sprockets-helpers", version: ">= 1.1.0"
-  require "sprockets"
-  require "sprockets-helpers"
-
-  gem "tilt", version: ">= 1.4.1"
-  require "tilt/haml"
-
   gem "json", version: ">= 1.4.4 <= 1.8.1"
   require "json"
 
@@ -45,15 +38,6 @@ else
 
   gem "sinatra-contrib", version: ">= 1.4.7"
   require "sinatra/json"
-
-  gem "sass", version: ">= 3.4.13"
-  require "sass"
-
-  gem "bootstrap-sass", version: ">= 3.3.5"
-  require "bootstrap-sass"
-
-  gem "uglifier", version: ">= 2.7.2"
-  require "uglifier"
 
   gem "pg", version: "~> 0.17.1"
   require "pg"
