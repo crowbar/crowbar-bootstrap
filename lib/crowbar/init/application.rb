@@ -24,11 +24,6 @@ module Crowbar
       set :root, File.expand_path("../../../..", __FILE__)
       set :bind, "0.0.0.0"
       set :logging, true
-      set :haml, format: :html5, attr_wrapper: "\""
-
-      set :sprockets, Sprockets::Environment.new(root)
-      set :assets_prefix, "/assets"
-      set :digest_assets, false
 
       if ENV["RAILS_ENV"] && !ENV["RACK_ENV"]
         set :environment, ENV["RAILS_ENV"]
@@ -47,20 +42,6 @@ module Crowbar
         logfile = File.new(logpath, "a+")
         logfile.sync = true
         use Rack::CommonLogger, logfile
-
-        sprockets.append_path File.join(root, "assets", "stylesheets")
-        sprockets.append_path File.join(root, "vendor", "assets", "stylesheets")
-
-        sprockets.append_path File.join(root, "assets", "javascripts")
-        sprockets.append_path File.join(root, "vendor", "assets", "javascripts")
-
-        Sprockets::Helpers.configure do |config|
-          config.environment = sprockets
-          config.prefix = assets_prefix
-          config.digest = digest_assets
-          config.public_path = public_folder
-          config.debug = true if development?
-        end
       end
 
       configure :development do
@@ -68,7 +49,6 @@ module Crowbar
       end
 
       helpers do
-        include Sprockets::Helpers
         include Crowbar::Init::Helpers
       end
 
@@ -367,15 +347,6 @@ module Crowbar
         status init[:code]
         json(
           result
-        )
-      end
-
-      # internal API endpoint
-      get "/assets/*" do
-        settings.sprockets.call(
-          env.merge(
-            "PATH_INFO" => params[:splat].first
-          )
         )
       end
     end
