@@ -263,7 +263,7 @@ module Crowbar
       # param :username, String, desc: "Username"
       # param :password, String, desc: "Password"
       # api_version "2.0"
-      post "/upgrade/new" do
+      post "/api/upgrade/new" do
         api_constraint(2.0)
         attributes = {
           postgresql: {
@@ -305,7 +305,7 @@ module Crowbar
       # param :host, String, desc: "External database host"
       # param :port, Integer, desc: "External database port"
       # api_version "2.0"
-      post "/upgrade/connect" do
+      post "/api/upgrade/connect" do
         api_constraint(2.0)
         attributes = {
           postgresql: {
