@@ -272,27 +272,36 @@ module Crowbar
           },
           run_list: ["recipe[postgresql::default]"]
         }
+        http_code = 200
 
-        result = {
-          database_setup: {
+        result = {}.tap do |res|
+          res[:database_setup] = {
             success: chef(attributes)
-          },
-          database_migration: {
+          }
+          break unless res[:database_setup][:success]
+
+          res[:database_migration] = {
             success: migrate_database
-          },
-          schema_migration: {
+          }
+          break unless res[:database_migration][:success]
+
+          res[:schema_migration] = {
             success: migrate_crowbar
           }
-        }
+          break unless res[:schema_migration][:success]
 
-        init = crowbar_init
-        result[:crowbar_init] = {
-          success: init[:code] == 200
-        }
+          init = crowbar_init
+          res[:crowbar_init] = {
+            success: init[:code] == 200
+          }
 
-        result[:crowbar_init][:body] = init[:body] if init[:body]
+          if init[:body] # nil body means success
+            result[:crowbar_init][:body] = init[:body]
+            http_code = 422
+          end
+        end
 
-        status init[:code]
+        status http_code
         json(
           result
         )
@@ -318,6 +327,7 @@ module Crowbar
           },
           run_list: ["recipe[postgresql::config]"]
         }
+        http_code = 200
 
         begin
           test_db_connection(attributes[:postgresql])
@@ -325,26 +335,34 @@ module Crowbar
           halt 406, {}, e.message
         end
 
-        result = {
-          database_setup: {
+        result = {}.tap do |res|
+          res[:database_setup] = {
             success: chef(attributes)
-          },
-          database_migration: {
+          }
+          break unless res[:database_setup][:success]
+
+          res[:database_migration] = {
             success: migrate_database
-          },
-          schema_migration: {
+          }
+          break unless res[:database_migration][:success]
+
+          res[:schema_migration] = {
             success: migrate_crowbar
           }
-        }
+          break unless res[:schema_migration][:success]
 
-        init = crowbar_init
-        result[:crowbar_init] = {
-          success: init[:code] == 200
-        }
+          init = crowbar_init
+          res[:crowbar_init] = {
+            success: init[:code] == 200
+          }
 
-        result[:crowbar_init][:body] = init[:body] if init[:body]
+          if init[:body] # nil body means success
+            result[:crowbar_init][:body] = init[:body]
+            http_code = 422
+          end
+        end
 
-        status init[:code]
+        status http_code
         json(
           result
         )
