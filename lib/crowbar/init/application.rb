@@ -67,7 +67,7 @@ module Crowbar
 
       # api :POST, "Initialize Crowbar"
       # api_version "2.0"
-      post "/init" do
+      post "/api/init" do
         api_constraint(2.0)
 
         init = crowbar_init
@@ -80,7 +80,7 @@ module Crowbar
 
       # api :POST, "Reset Crowbar"
       # api_version "2.0"
-      post "/reset" do
+      post "/api/reset" do
         api_constraint(2.0)
 
         reset = crowbar_reset
@@ -92,7 +92,8 @@ module Crowbar
       end
 
       # api :POST, "Migrate crowbar schemas"
-      post "/migrate" do
+      # api_version "2.0"
+      post "/api/migrate" do
         api_constraint(2.0)
         if migrate_crowbar
           json(
@@ -112,7 +113,7 @@ module Crowbar
 
       # api :GET, "Crowbar status"
       # api_version "2.0"
-      get "/status" do
+      get "/api/status" do
         api_constraint(2.0)
         ret = {
           code: 200,
@@ -134,7 +135,7 @@ module Crowbar
       # param :host, String, desc: "External database host"
       # param :port, Integer, desc: "External database port"
       # api_version "2.0"
-      post "/database/test" do
+      post "/api/database/test" do
         api_constraint(2.0)
         attributes = {
           username: params[:username] || "crowbar",
@@ -175,7 +176,7 @@ module Crowbar
       # param :username, String, desc: "Username"
       # param :password, String, desc: "Password"
       # api_version "2.0"
-      post "/database/new" do
+      post "/api/database/new" do
         api_constraint(2.0)
         attributes = {
           postgresql: {
@@ -209,7 +210,7 @@ module Crowbar
       # param :host, String, desc: "External database host"
       # param :port, Integer, desc: "External database port"
       # api_version "2.0"
-      post "/database/connect" do
+      post "/api/database/connect" do
         api_constraint(2.0)
         attributes = {
           postgresql: {
@@ -241,7 +242,7 @@ module Crowbar
       end
 
       # api :POST, "Migrate the sqlite database to postgresql"
-      post "/database/migrate" do
+      post "/api/database/migrate" do
         api_constraint(2.0)
         if migrate_database
           json(
