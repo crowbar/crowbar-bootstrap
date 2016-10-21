@@ -12,8 +12,8 @@ TimeoutSec=300
 TimeoutStopSec=10
 
 Environment="CROWBAR_INIT_ENV=production"
-Environment="CROWBAR_INIT_THREADS=10"
-Environment="CROWBAR_INIT_WORKERS=5"
+Environment="CROWBAR_INIT_THREADS=5"
+Environment="CROWBAR_INIT_WORKERS=1"
 Environment="CROWBAR_INIT_LISTEN=127.0.0.1"
 Environment="CROWBAR_INIT_PORT=4567"
 
