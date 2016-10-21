@@ -210,7 +210,9 @@ module Crowbar
               versions_requested[:minor].to_i <= minor
         end
 
-        halt 406, { "Content-Type" => "application/vnd.crowbar.v#{major}.#{minor}+json" }, ""
+        halt 406, {
+          "Content-Type" => "application/vnd.crowbar.v#{Crowbar::Init::Version.api_latest}+json"
+        }, ""
       end
 
       def migrate_database
