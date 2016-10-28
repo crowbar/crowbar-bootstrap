@@ -39,6 +39,15 @@ module Crowbar
         def to_s
           [MAJOR, MINOR].compact.join(".")
         end
+
+        #
+        # Get the latest API version for Crowbar Init
+        #
+        # @return [Float] the version of Crowbar Init API
+        #
+        def api_latest
+          2.0
+        end
       end
     end
   end
