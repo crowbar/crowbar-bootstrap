@@ -279,17 +279,17 @@ module Crowbar
           res[:database_setup] = {
             success: chef(attributes)
           }
-          break unless res[:database_setup][:success]
+          next unless res[:database_setup][:success]
 
           res[:database_migration] = {
             success: migrate_database
           }
-          break unless res[:database_migration][:success]
+          next unless res[:database_migration][:success]
 
           res[:schema_migration] = {
             success: migrate_crowbar
           }
-          break unless res[:schema_migration][:success]
+          next unless res[:schema_migration][:success]
 
           init = crowbar_init
           res[:crowbar_init] = {
@@ -340,17 +340,17 @@ module Crowbar
           res[:database_setup] = {
             success: chef(attributes)
           }
-          break unless res[:database_setup][:success]
+          next unless res[:database_setup][:success]
 
           res[:database_migration] = {
             success: migrate_database
           }
-          break unless res[:database_migration][:success]
+          next unless res[:database_migration][:success]
 
           res[:schema_migration] = {
             success: migrate_crowbar
           }
-          break unless res[:schema_migration][:success]
+          next unless res[:schema_migration][:success]
 
           init = crowbar_init
           res[:crowbar_init] = {
