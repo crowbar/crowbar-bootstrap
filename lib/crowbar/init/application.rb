@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 
+require "/opt/dell/crowbar_framework/lib/crowbar/upgrade_status"
+
 module Crowbar
   module Init
     #
@@ -284,6 +286,27 @@ module Crowbar
             }
           )
         end
+      end
+
+      # api :GET, "Crowbar upgrade status"
+      # api_version "2.0"
+      get "/api/upgrade" do
+        api_constraint(2.0)
+        http_code = 200
+        crowbar_upgrade_status = ::Crowbar::UpgradeStatus.new(logger)
+        if crowbar_upgrade_status.progress.is_a?(Hash)
+          response = crowbar_upgrade_status.progress
+        else
+          response = {
+            error: "Could not read from /var/lib/crowbar/upgrade/progress.yml"
+          }
+          http_code = 503
+        end
+
+        status http_code
+        json(
+          response
+        )
       end
 
       # api :POST, "Initialization during upgrade with creation of a new database"
