@@ -43,3 +43,11 @@ bind "tcp://#{LISTEN}:#{PORT}"
 ].each do |name|
   FileUtils.mkdir_p File.join(ROOT, name)
 end
+
+# set the end_step status during the upgrade
+if File.exist?("/var/lib/crowbar/upgrade/progress.yml")
+  require "logger"
+  require "crowbar/upgrade_status"
+  upgrade_status = ::Crowbar::UpgradeStatus.new(Logger.new(Logger::STDOUT))
+  upgrade_status.end_step if upgrade_status.current_step == :admin_upgrade
+end
