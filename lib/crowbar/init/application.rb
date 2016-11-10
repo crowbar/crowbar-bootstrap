@@ -185,22 +185,33 @@ module Crowbar
           },
           run_list: ["recipe[postgresql::default]"]
         }
+        http_code = 200
 
         logger.debug("Creating Crowbar database")
-        if chef(attributes)
-          json(
-            code: 200,
-            body: nil
-          )
-        else
-          status 500
-          json(
-            code: 500,
-            body: {
-              error: "Could not create database. Please have a look at /var/log/chef/solo.log"
-            }
-          )
+        result = {}.tap do |res|
+          res[:database_setup] = {
+            success: chef(attributes)
+          }
+          unless res[:database_setup][:success]
+            http_code = 422
+            next
+          end
+
+          init = crowbar_init
+          res[:crowbar_init] = {
+            success: init[:code] == 200
+          }
+
+          if init[:body] # nil body means success
+            result[:crowbar_init][:body] = init[:body]
+            http_code = 422
+          end
         end
+
+        status http_code
+        json(
+          result
+        )
       end
 
       # api :POST, "Connect Crowbar to an existing external database"
@@ -223,22 +234,33 @@ module Crowbar
           },
           run_list: ["recipe[postgresql::config]"]
         }
+        http_code = 200
 
         logger.debug("Connecting Crowbar to external database")
-        if chef(attributes)
-          json(
-            code: 200,
-            body: nil
-          )
-        else
-          status 500
-          json(
-            code: 500,
-            body: {
-              error: "Could not connect to database. Please have a look at /var/log/chef/solo.log"
-            }
-          )
+        result = {}.tap do |res|
+          res[:database_setup] = {
+            success: chef(attributes)
+          }
+          unless res[:database_setup][:success]
+            http_code = 422
+            next
+          end
+
+          init = crowbar_init
+          res[:crowbar_init] = {
+            success: init[:code] == 200
+          }
+
+          if init[:body] # nil body means success
+            result[:crowbar_init][:body] = init[:body]
+            http_code = 422
+          end
         end
+
+        status http_code
+        json(
+          result
+        )
       end
 
       # api :POST, "Migrate the sqlite database to postgresql"
