@@ -280,6 +280,7 @@ module Crowbar
             success: chef(attributes)
           }
           unless res[:database_setup][:success]
+            res[:error] = "Failed to setup database"
             http_code = 422
             next
           end
@@ -289,6 +290,7 @@ module Crowbar
           }
           unless res[:database_migration][:success]
             http_code = 422
+            res[:error] = "Failed to migrate database"
             next
           end
 
@@ -297,6 +299,7 @@ module Crowbar
           }
           unless res[:schema_migration][:success]
             http_code = 422
+            res[:error] = "Failed to migrate schemas"
             next
           end
 
@@ -351,6 +354,7 @@ module Crowbar
           }
           unless res[:database_setup][:success]
             http_code = 422
+            res[:error] = "Failed to setup database"
             next
           end
 
@@ -359,6 +363,7 @@ module Crowbar
           }
           unless res[:database_migration][:success]
             http_code = 422
+            res[:error] = "Failed to migrate database"
             next
           end
 
@@ -367,6 +372,7 @@ module Crowbar
           }
           unless res[:schema_migration][:success]
             http_code = 422
+            res[:error] = "Failed to migrate schemas"
             next
           end
 
