@@ -386,7 +386,7 @@ module Crowbar
           }
 
           if init[:body] # nil body means success
-            result[:crowbar_init][:body] = init[:body]
+            res[:crowbar_init][:body] = init[:body]
             http_code = 422
           end
         end
