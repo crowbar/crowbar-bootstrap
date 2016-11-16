@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-require "/opt/dell/crowbar_framework/lib/crowbar/upgrade_status"
+require "crowbar/upgrade_status"
 
 module Crowbar
   module Init
