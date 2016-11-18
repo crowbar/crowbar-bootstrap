@@ -7,8 +7,12 @@ WORKERS = ENV["CROWBAR_INIT_WORKERS"] || 1
 LISTEN = ENV["CROWBAR_INIT_LISTEN"] || "127.0.0.1"
 PORT = ENV["CROWBAR_INIT_PORT"] || 4567
 
+CROWBAR_LIB_DIR = "/opt/dell/crowbar_framework/lib".freeze
+
 require "fileutils"
 require "rack/test"
+
+$LOAD_PATH.push CROWBAR_LIB_DIR if Dir.exist?(CROWBAR_LIB_DIR)
 
 directory ROOT
 environment ENVIRONMENT
