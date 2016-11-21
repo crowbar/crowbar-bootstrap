@@ -360,6 +360,7 @@ module Crowbar
           if init[:body] # nil body means success
             result[:crowbar_init][:body] = init[:body]
             http_code = 422
+            res[:error] = "Failed to initialize Crowbar"
           end
         end
 
@@ -433,6 +434,7 @@ module Crowbar
           if init[:body] # nil body means success
             res[:error] = init[:body]
             http_code = 422
+            res[:error] = "Failed to initialize Crowbar"
           end
         end
 
