@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 
+require "fileutils"
+
 module Crowbar
   module Init
     module Helpers
@@ -217,9 +219,15 @@ module Crowbar
 
       def migrate_database
         ["data.yml", "schema.rb"].each do |file|
-          next if File.exist?("#{crowbar_framework_path}/db/#{file}")
-          logger.debug("Could not find #{crowbar_framework_path}/db/#{file}")
-          return false
+          file_path = "#{crowbar_framework_path}/db/#{file}"
+          backup_file_path = "/var/lib/crowbar/upgrade/#{file}"
+          next if File.exist?(file_path)
+          logger.warn("Could not find #{file_path}. Using #{backup_file_path}.")
+          unless File.exist?(backup_file_path)
+            logger.error("Could not find #{backup_file_path} either.")
+            return false
+          end
+          FileUtils.cp(backup_file_path, file_path, preserve: true)
         end
 
         cmd = run_cmd("cd /opt/dell/crowbar_framework && RAILS_ENV=production bin/rake db:load")
