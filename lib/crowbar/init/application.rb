@@ -315,6 +315,9 @@ module Crowbar
       # api_version "2.0"
       post "/api/upgrade/new" do
         api_constraint(2.0)
+        upgrade_status = ::Crowbar::UpgradeStatus.new(logger)
+        upgrade_status.start_step(:database)
+
         attributes = {
           postgresql: {
             username: params[:username],
@@ -360,7 +363,14 @@ module Crowbar
           if init[:body] # nil body means success
             result[:crowbar_init][:body] = init[:body]
             http_code = 422
+            res[:error] = "Failed to initialize Crowbar"
           end
+        end
+
+        if result[:error]
+          upgrade_status.end_step(false, database: result[:error])
+        else
+          upgrade_status.end_step
         end
 
         status http_code
@@ -378,6 +388,9 @@ module Crowbar
       # api_version "2.0"
       post "/api/upgrade/connect" do
         api_constraint(2.0)
+        upgrade_status = ::Crowbar::UpgradeStatus.new(logger)
+        upgrade_status.start_step(:database)
+
         attributes = {
           postgresql: {
             username: params[:username],
@@ -433,7 +446,14 @@ module Crowbar
           if init[:body] # nil body means success
             res[:error] = init[:body]
             http_code = 422
+            res[:error] = "Failed to initialize Crowbar"
           end
+        end
+
+        if result[:error]
+          upgrade_status.end_step(false, database: result[:error])
+        else
+          upgrade_status.end_step
         end
 
         status http_code
