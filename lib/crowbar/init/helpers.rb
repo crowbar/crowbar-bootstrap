@@ -237,13 +237,11 @@ module Crowbar
       end
 
       def migrate_crowbar
-        cmd = run_cmd(
+        logger.debug("Migrating crowbar schemas")
+        run_cmd(
           "cd /opt/dell/crowbar_framework && " \
           "RAILS_ENV=production bin/rake crowbar:schema_migrate_prod"
         )
-        return true if cmd[:exit_code].zero?
-
-        false
       end
 
       def crowbar_init
@@ -257,6 +255,7 @@ module Crowbar
           [:symlink_apache_to, :rails],
           [:reload_apache],
           [:wait_for_crowbar],
+          [:migrate_crowbar],
           [:shutdown_crowbar_init]
         ].each do |command|
           cmd_ret = send(*command)
