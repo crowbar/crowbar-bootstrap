@@ -298,7 +298,7 @@ module Crowbar
           response = crowbar_upgrade_status.progress
         else
           response = {
-            error: "Could not read from /var/lib/crowbar/upgrade/progress.yml"
+            error: "Could not read from /var/lib/crowbar/upgrade/6-to-7-progress.yml"
           }
           http_code = 503
         end
