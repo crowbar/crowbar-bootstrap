@@ -45,7 +45,7 @@ bind "tcp://#{LISTEN}:#{PORT}"
 end
 
 # set the end_step status during the upgrade
-if File.exist?("/var/lib/crowbar/upgrade/progress.yml")
+if File.exist?("/var/lib/crowbar/upgrade/6-to-7-progress.yml")
   require "logger"
   require "crowbar/upgrade_status"
   upgrade_status = ::Crowbar::UpgradeStatus.new(Logger.new(Logger::STDOUT))
