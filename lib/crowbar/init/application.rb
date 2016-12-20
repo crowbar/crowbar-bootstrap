@@ -293,7 +293,11 @@ module Crowbar
       get "/api/upgrade" do
         api_constraint(2.0)
         http_code = 200
-        crowbar_upgrade_status = ::Crowbar::UpgradeStatus.new(logger)
+        crowbar_upgrade_status = ::Crowbar::UpgradeStatus.new(
+          logger,
+          "/var/lib/crowbar/upgrade/6-to-7-progress.yml",
+          false
+        )
         if crowbar_upgrade_status.progress.is_a?(Hash)
           response = crowbar_upgrade_status.progress
         else
