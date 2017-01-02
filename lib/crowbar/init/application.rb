@@ -101,7 +101,7 @@ module Crowbar
       # api_version "2.0"
       post "/api/migrate" do
         api_constraint(2.0)
-        if migrate_crowbar
+        if migrate_crowbar[:exit_code].zero?
           json(
             code: 200,
             body: nil
@@ -346,15 +346,6 @@ module Crowbar
             next
           end
 
-          res[:schema_migration] = {
-            success: migrate_crowbar
-          }
-          unless res[:schema_migration][:success]
-            http_code = 422
-            res[:error] = "Failed to migrate schemas"
-            next
-          end
-
           init = crowbar_init
           res[:crowbar_init] = {
             success: init[:code] == 200
@@ -426,15 +417,6 @@ module Crowbar
           unless res[:database_migration][:success]
             http_code = 422
             res[:error] = "Failed to migrate database"
-            next
-          end
-
-          res[:schema_migration] = {
-            success: migrate_crowbar
-          }
-          unless res[:schema_migration][:success]
-            http_code = 422
-            res[:error] = "Failed to migrate schemas"
             next
           end
 
