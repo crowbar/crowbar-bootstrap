@@ -108,6 +108,7 @@ module Crowbar
             body: nil
           )
         else
+          logger.error(migration[:stdout_and_stderr])
           status 500
           json(
             code: 500,
@@ -169,6 +170,7 @@ module Crowbar
             )
           end
         rescue PG::ConnectionBad => e
+          logger.error(e.message)
           status 406
           json(
             code: 406,
@@ -201,6 +203,7 @@ module Crowbar
             success: chef_solo_run[:exit_code].zero?
           }
           unless res[:database_setup][:success]
+            logger.error(chef_solo_run[:stdout_and_stderr])
             http_code = 422
             res[:error] = chef_solo_run[:stdout_and_stderr]
             next
@@ -212,6 +215,7 @@ module Crowbar
           }
 
           if init[:body] # nil body means success
+            logger.error(init[:body])
             res[:crowbar_init][:body] = init[:body]
             http_code = 422
           end
@@ -252,6 +256,7 @@ module Crowbar
             success: chef_solo_run[:exit_code].zero?
           }
           unless res[:database_setup][:success]
+            logger.error(chef_solo_run[:stdout_and_stderr])
             http_code = 422
             res[:error] = chef_solo_run[:stdout_and_stderr]
             next
@@ -263,6 +268,7 @@ module Crowbar
           }
 
           if init[:body] # nil body means success
+            logger.error(init[:body])
             res[:crowbar_init][:body] = init[:body]
             http_code = 422
           end
@@ -284,6 +290,7 @@ module Crowbar
             body: nil
           )
         else
+          logger.error(database_migration[:stdout_and_stderr])
           status 500
           json(
             code: 500,
@@ -339,6 +346,7 @@ module Crowbar
             success: chef_solo_run[:exit_code].zero?
           }
           unless res[:database_setup][:success]
+            logger.error(chef_solo_run[:stdout_and_stderr])
             res[:error] = chef_solo_run[:stdout_and_stderr]
             http_code = 422
             next
@@ -349,6 +357,7 @@ module Crowbar
             success: database_migration[:exit_code].zero?
           }
           unless res[:database_migration][:success]
+            logger.error(database_migration[:stdout_and_stderr])
             http_code = 422
             res[:error] = database_migration[:stdout_and_stderr]
             next
@@ -359,6 +368,7 @@ module Crowbar
             success: schema_migration[:exit_code].zero?
           }
           unless res[:schema_migration][:success]
+            logger.error(schema_migration[:stdout_and_stderr])
             http_code = 422
             res[:error] = schema_migration[:stdout_and_stderr]
             next
@@ -370,6 +380,7 @@ module Crowbar
           }
 
           if init[:body] # nil body means success
+            logger.error(init[:body])
             res[:error] = init[:body]
             http_code = 422
           end
@@ -424,6 +435,7 @@ module Crowbar
             success: chef_solo_run[:exit_code].zero?
           }
           unless res[:database_setup][:success]
+            logger.error(chef_solo_run[:stdout_and_stderr])
             http_code = 422
             res[:error] = chef_solo_run[:stdout_and_stderr]
             next
@@ -434,6 +446,7 @@ module Crowbar
             success: database_migration[:exit_code].zero?
           }
           unless res[:database_migration][:success]
+            logger.error(database_migration[:stdout_and_stderr])
             http_code = 422
             res[:error] = database_migration[:stdout_and_stderr]
             next
@@ -444,6 +457,7 @@ module Crowbar
             success: schema_migration[:exit_code].zero?
           }
           unless res[:schema_migration][:success]
+            logger.error(schema_migration[:stdout_and_stderr])
             http_code = 422
             res[:error] = schema_migration[:stdout_and_stderr]
             next
@@ -455,6 +469,7 @@ module Crowbar
           }
 
           if init[:body] # nil body means success
+            logger.error(init[:body])
             res[:error] = init[:body]
             http_code = 422
           end
