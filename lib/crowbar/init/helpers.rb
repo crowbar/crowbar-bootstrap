@@ -38,9 +38,7 @@ module Crowbar
             "-o '#{run_list}'"
           ].join(" ")
 
-          return true if run_cmd(cmd)[:exit_code].zero?
-
-          false
+          return run_cmd(cmd)
         end
       end
 
@@ -227,10 +225,7 @@ module Crowbar
           FileUtils.cp(backup_file_path, file_path, preserve: true)
         end
 
-        cmd = run_cmd("cd /opt/dell/crowbar_framework && RAILS_ENV=production bin/rake db:load")
-        return true if cmd[:exit_code].zero?
-
-        false
+        run_cmd("cd /opt/dell/crowbar_framework && RAILS_ENV=production bin/rake db:load")
       end
 
       def migrate_crowbar
