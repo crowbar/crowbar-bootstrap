@@ -45,10 +45,9 @@ module Crowbar
       end
 
       def run_cmd(*args)
-        Open3.popen3(*args) do |stdin, stdout, stderr, wait_thr|
+        Open3.popen2e(*args) do |stdin, stdout_and_stderr, wait_thr|
           {
-            stdout: stdout.gets(nil),
-            stderr: stderr.gets(nil),
+            message: stdout_and_stderr.gets(nil),
             exit_code: wait_thr.value.exitstatus
           }
         end
@@ -188,14 +187,12 @@ module Crowbar
           # TODO: implement a busyloop
           sleep 15
           {
-            stdout: "",
-            stderr: "",
+            message: "",
             exit_code: 0
           }
         rescue => e
           {
-            stdout: "",
-            stderr: e.message.inspect,
+            message: e.message.inspect,
             exit_code: 1
           }
         end
@@ -261,15 +258,9 @@ module Crowbar
           cmd_ret = send(*command)
           next if cmd_ret[:exit_code].zero?
 
-          message = if cmd_ret[:stdout].nil? || cmd_ret[:stdout].empty?
-            cmd_ret[:stderr]
-          else
-            cmd_ret[:stdout]
-          end
-
           status[:code] = 500
           status[:body] = {
-            error: "#{command.inspect}: #{message}"
+            error: "#{command.inspect}: #{cmd_ret[:stdout_and_stderr]}"
           }
 
           break
@@ -292,15 +283,9 @@ module Crowbar
           cmd_ret = send(*command)
           next if cmd_ret[:exit_code].zero?
 
-          message = if cmd_ret[:stdout].nil? || cmd_ret[:stdout].empty?
-            cmd_ret[:stderr]
-          else
-            cmd_ret[:stdout]
-          end
-
           status[:code] = 500
           status[:body] = {
-            error: message
+            error: "#{command.inspect}: #{cmd_ret[:stdout_and_stderr]}"
           }
 
           break
