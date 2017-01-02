@@ -116,6 +116,16 @@ module Crowbar
         )
       end
 
+      def crowbar_jobs_service(action)
+        logger.debug("#{action.capitalize}ing crowbar-jobs service")
+        run_cmd(
+          "sudo",
+          "systemctl",
+          action.to_s,
+          "crowbar-jobs.service"
+        )
+      end
+
       def shutdown_crowbar_init
         logger.debug("Shutting down crowbar-init service")
         cmd_ret = run_cmd(
@@ -244,6 +254,8 @@ module Crowbar
 
         [
           [:crowbar_service, :start],
+          [:crowbar_jobs_service, :enable],
+          [:crowbar_jobs_service, :start],
           [:symlink_apache_to, :rails],
           [:reload_apache],
           [:wait_for_crowbar],
@@ -275,6 +287,8 @@ module Crowbar
 
         [
           [:crowbar_service, :stop],
+          [:crowbar_jobs_service, :disable],
+          [:crowbar_jobs_service, :stop],
           [:symlink_apache_to, :sinatra],
           [:reload_apache]
         ].each do |command|
