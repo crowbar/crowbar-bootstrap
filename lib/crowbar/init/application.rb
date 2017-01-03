@@ -101,17 +101,19 @@ module Crowbar
       # api_version "2.0"
       post "/api/migrate" do
         api_constraint(2.0)
-        if migrate_crowbar[:exit_code].zero?
+        migration = migrate_crowbar
+        if migration[:exit_code].zero?
           json(
             code: 200,
             body: nil
           )
         else
+          logger.error(migration[:stdout_and_stderr])
           status 500
           json(
             code: 500,
             body: {
-              error: "Could not migrate crowbar schemas to newest version."
+              error: migration[:stdout_and_stderr]
             }
           )
         end
@@ -168,6 +170,7 @@ module Crowbar
             )
           end
         rescue PG::ConnectionBad => e
+          logger.error(e.message)
           status 406
           json(
             code: 406,
@@ -195,11 +198,14 @@ module Crowbar
 
         logger.debug("Creating Crowbar database")
         result = {}.tap do |res|
+          chef_solo_run = chef(attributes)
           res[:database_setup] = {
-            success: chef(attributes)
+            success: chef_solo_run[:exit_code].zero?
           }
           unless res[:database_setup][:success]
+            logger.error(chef_solo_run[:stdout_and_stderr])
             http_code = 422
+            res[:error] = chef_solo_run[:stdout_and_stderr]
             next
           end
 
@@ -209,7 +215,8 @@ module Crowbar
           }
 
           if init[:body] # nil body means success
-            result[:crowbar_init][:body] = init[:body]
+            logger.error(init[:body])
+            res[:crowbar_init][:body] = init[:body]
             http_code = 422
           end
         end
@@ -244,11 +251,14 @@ module Crowbar
 
         logger.debug("Connecting Crowbar to external database")
         result = {}.tap do |res|
+          chef_solo_run = chef(attributes)
           res[:database_setup] = {
-            success: chef(attributes)
+            success: chef_solo_run[:exit_code].zero?
           }
           unless res[:database_setup][:success]
+            logger.error(chef_solo_run[:stdout_and_stderr])
             http_code = 422
+            res[:error] = chef_solo_run[:stdout_and_stderr]
             next
           end
 
@@ -258,7 +268,8 @@ module Crowbar
           }
 
           if init[:body] # nil body means success
-            result[:crowbar_init][:body] = init[:body]
+            logger.error(init[:body])
+            res[:crowbar_init][:body] = init[:body]
             http_code = 422
           end
         end
@@ -272,17 +283,19 @@ module Crowbar
       # api :POST, "Migrate the sqlite database to postgresql"
       post "/api/database/migrate" do
         api_constraint(2.0)
-        if migrate_database
+        database_migration = migrate_database
+        if database_migration[:exit_code].zero?
           json(
             code: 200,
             body: nil
           )
         else
+          logger.error(database_migration[:stdout_and_stderr])
           status 500
           json(
             code: 500,
             body: {
-              error: "Could not migrate crowbar database to postgresql."
+              error: database_migration[:stdout_and_stderr]
             }
           )
         end
@@ -328,21 +341,36 @@ module Crowbar
         http_code = 200
 
         result = {}.tap do |res|
+          chef_solo_run = chef(attributes)
           res[:database_setup] = {
-            success: chef(attributes)
+            success: chef_solo_run[:exit_code].zero?
           }
           unless res[:database_setup][:success]
-            res[:error] = "Failed to setup database"
+            logger.error(chef_solo_run[:stdout_and_stderr])
+            res[:error] = chef_solo_run[:stdout_and_stderr]
             http_code = 422
             next
           end
 
+          database_migration = migrate_database
           res[:database_migration] = {
-            success: migrate_database
+            success: database_migration[:exit_code].zero?
           }
           unless res[:database_migration][:success]
+            logger.error(database_migration[:stdout_and_stderr])
             http_code = 422
-            res[:error] = "Failed to migrate database"
+            res[:error] = database_migration[:stdout_and_stderr]
+            next
+          end
+
+          schema_migration = migrate_crowbar
+          res[:schema_migration] = {
+            success: schema_migration[:exit_code].zero?
+          }
+          unless res[:schema_migration][:success]
+            logger.error(schema_migration[:stdout_and_stderr])
+            http_code = 422
+            res[:error] = schema_migration[:stdout_and_stderr]
             next
           end
 
@@ -352,9 +380,9 @@ module Crowbar
           }
 
           if init[:body] # nil body means success
-            result[:crowbar_init][:body] = init[:body]
+            logger.error(init[:body])
+            res[:error] = init[:body]
             http_code = 422
-            res[:error] = "Failed to initialize Crowbar"
           end
         end
 
@@ -402,21 +430,36 @@ module Crowbar
         end
 
         result = {}.tap do |res|
+          chef_solo_run = chef(attributes)
           res[:database_setup] = {
-            success: chef(attributes)
+            success: chef_solo_run[:exit_code].zero?
           }
           unless res[:database_setup][:success]
+            logger.error(chef_solo_run[:stdout_and_stderr])
             http_code = 422
-            res[:error] = "Failed to setup database"
+            res[:error] = chef_solo_run[:stdout_and_stderr]
             next
           end
 
+          database_migration = migrate_database
           res[:database_migration] = {
-            success: migrate_database
+            success: database_migration[:exit_code].zero?
           }
           unless res[:database_migration][:success]
+            logger.error(database_migration[:stdout_and_stderr])
             http_code = 422
-            res[:error] = "Failed to migrate database"
+            res[:error] = database_migration[:stdout_and_stderr]
+            next
+          end
+
+          schema_migration = migrate_crowbar
+          res[:schema_migration] = {
+            success: schema_migration[:exit_code].zero?
+          }
+          unless res[:schema_migration][:success]
+            logger.error(schema_migration[:stdout_and_stderr])
+            http_code = 422
+            res[:error] = schema_migration[:stdout_and_stderr]
             next
           end
 
@@ -426,9 +469,9 @@ module Crowbar
           }
 
           if init[:body] # nil body means success
+            logger.error(init[:body])
             res[:error] = init[:body]
             http_code = 422
-            res[:error] = "Failed to initialize Crowbar"
           end
         end
 

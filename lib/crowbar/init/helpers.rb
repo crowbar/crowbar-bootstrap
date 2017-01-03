@@ -38,17 +38,14 @@ module Crowbar
             "-o '#{run_list}'"
           ].join(" ")
 
-          return true if run_cmd(cmd)[:exit_code].zero?
-
-          false
+          return run_cmd(cmd)
         end
       end
 
       def run_cmd(*args)
-        Open3.popen3(*args) do |stdin, stdout, stderr, wait_thr|
+        Open3.popen2e(*args) do |stdin, stdout_and_stderr, wait_thr|
           {
-            stdout: stdout.gets(nil),
-            stderr: stderr.gets(nil),
+            message: stdout_and_stderr.gets(nil),
             exit_code: wait_thr.value.exitstatus
           }
         end
@@ -116,6 +113,16 @@ module Crowbar
           "systemctl",
           action.to_s,
           "crowbar.service"
+        )
+      end
+
+      def crowbar_jobs_service(action)
+        logger.debug("#{action.capitalize}ing crowbar-jobs service")
+        run_cmd(
+          "sudo",
+          "systemctl",
+          action.to_s,
+          "crowbar-jobs.service"
         )
       end
 
@@ -188,14 +195,12 @@ module Crowbar
           # TODO: implement a busyloop
           sleep 15
           {
-            stdout: "",
-            stderr: "",
+            message: "",
             exit_code: 0
           }
         rescue => e
           {
-            stdout: "",
-            stderr: e.message.inspect,
+            message: e.message.inspect,
             exit_code: 1
           }
         end
@@ -230,10 +235,7 @@ module Crowbar
           FileUtils.cp(backup_file_path, file_path, preserve: true)
         end
 
-        cmd = run_cmd("cd /opt/dell/crowbar_framework && RAILS_ENV=production bin/rake db:load")
-        return true if cmd[:exit_code].zero?
-
-        false
+        run_cmd("cd /opt/dell/crowbar_framework && RAILS_ENV=production bin/rake db:load")
       end
 
       def migrate_crowbar
@@ -252,6 +254,8 @@ module Crowbar
 
         [
           [:crowbar_service, :start],
+          [:crowbar_jobs_service, :enable],
+          [:crowbar_jobs_service, :start],
           [:symlink_apache_to, :rails],
           [:reload_apache],
           [:wait_for_crowbar],
@@ -261,15 +265,12 @@ module Crowbar
           cmd_ret = send(*command)
           next if cmd_ret[:exit_code].zero?
 
-          message = if cmd_ret[:stdout].nil? || cmd_ret[:stdout].empty?
-            cmd_ret[:stderr]
-          else
-            cmd_ret[:stdout]
-          end
+          errmsg = "#{command.inspect}: #{cmd_ret[:stdout_and_stderr]}"
+          logger.error(errmsg)
 
           status[:code] = 500
           status[:body] = {
-            error: "#{command.inspect}: #{message}"
+            error: errmsg
           }
 
           break
@@ -286,21 +287,20 @@ module Crowbar
 
         [
           [:crowbar_service, :stop],
+          [:crowbar_jobs_service, :disable],
+          [:crowbar_jobs_service, :stop],
           [:symlink_apache_to, :sinatra],
           [:reload_apache]
         ].each do |command|
           cmd_ret = send(*command)
           next if cmd_ret[:exit_code].zero?
 
-          message = if cmd_ret[:stdout].nil? || cmd_ret[:stdout].empty?
-            cmd_ret[:stderr]
-          else
-            cmd_ret[:stdout]
-          end
+          errmsg = "#{command.inspect}: #{cmd_ret[:stdout_and_stderr]}"
+          logger.error(errmsg)
 
           status[:code] = 500
           status[:body] = {
-            error: message
+            error: errmsg
           }
 
           break
