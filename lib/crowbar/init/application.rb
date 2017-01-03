@@ -34,7 +34,8 @@ module Crowbar
       before do
         logger.level = Logger::DEBUG
         # parse JSON in POST requests
-        if request.request_method == "POST" && request.content_type.include?("json")
+        if request.request_method == "POST" &&
+            (!request.content_type.nil? && request.content_type.include?("json"))
           params.merge!(JSON.parse(request.body.read, symbolize_names: true))
         end
       end
