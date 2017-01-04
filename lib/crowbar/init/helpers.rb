@@ -265,12 +265,13 @@ module Crowbar
           cmd_ret = send(*command)
           next if cmd_ret[:exit_code].zero?
 
-          errmsg = "#{command.inspect}: #{cmd_ret[:stdout_and_stderr]}"
+          errmsg = "#{command.join}: #{cmd_ret[:stdout_and_stderr]}"
           logger.error(errmsg)
 
           status[:code] = 500
           status[:body] = {
-            error: errmsg
+            data: errmsg,
+            help: "Refer to the error message in the response."
           }
 
           break
