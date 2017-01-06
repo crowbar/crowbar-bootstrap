@@ -246,6 +246,14 @@ module Crowbar
         )
       end
 
+      def update_config_db
+        logger.debug("Updating crowbar configuration DB")
+        run_cmd(
+          "cd /opt/dell/crowbar_framework && " \
+          "RAILS_ENV=production bin/rake crowbar:update_config_db"
+        )
+      end
+
       def crowbar_init
         status = {
           code: 200,
@@ -260,6 +268,7 @@ module Crowbar
           [:reload_apache],
           [:wait_for_crowbar],
           [:migrate_crowbar],
+          [:update_config_db],
           [:shutdown_crowbar_init]
         ].each do |command|
           cmd_ret = send(*command)
