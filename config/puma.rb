@@ -49,5 +49,5 @@ if File.exist?("/var/lib/crowbar/upgrade/6-to-7-progress.yml")
   require "logger"
   require "crowbar/upgrade_status"
   upgrade_status = ::Crowbar::UpgradeStatus.new(Logger.new(Logger::STDOUT))
-  upgrade_status.end_step if upgrade_status.current_step == :admin_upgrade
+  upgrade_status.end_step if upgrade_status.current_step == :admin
 end
