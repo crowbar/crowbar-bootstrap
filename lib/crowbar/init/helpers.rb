@@ -254,17 +254,11 @@ module Crowbar
         )
       end
 
-      def ensure_admin_node_exist
-        # temporary workaround to enable gating for crowbar-core#920
-        unless File.exist?("/opt/dell/crowbar_framework/app/models/chef_node.rb")
-          return { exit_code: 0, message: "" }
-        end
-
-        logger.debug("Ensure admin node exist in database")
-        fqdn = `hostname -f`.strip
+      def seed_db
+        logger.debug("Seeding crowbar database")
         run_cmd(
           "cd /opt/dell/crowbar_framework && " \
-          "RAILS_ENV=production bin/rails runner \"Node.find_or_create_by(name: '#{fqdn}')\""
+          "RAILS_ENV=production bin/rake db:seed"
         )
       end
 
@@ -283,7 +277,7 @@ module Crowbar
           [:wait_for_crowbar],
           [:migrate_crowbar],
           [:update_config_db],
-          [:ensure_admin_node_exist],
+          [:seed_db],
           [:shutdown_crowbar_init]
         ].each do |command|
           cmd_ret = send(*command)
