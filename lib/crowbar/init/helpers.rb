@@ -272,12 +272,12 @@ module Crowbar
           [:crowbar_service, :start],
           [:crowbar_jobs_service, :enable],
           [:crowbar_jobs_service, :start],
+          [:wait_for_crowbar],
           [:migrate_crowbar],
           [:update_config_db],
           [:seed_db],
           [:symlink_apache_to, :rails],
           [:reload_apache],
-          [:wait_for_crowbar],
           [:shutdown_crowbar_init]
         ].each do |command|
           cmd_ret = send(*command)
