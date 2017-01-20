@@ -45,7 +45,7 @@ module Crowbar
       def run_cmd(*args)
         Open3.popen2e(*args) do |stdin, stdout_and_stderr, wait_thr|
           {
-            message: stdout_and_stderr.gets(nil),
+            stdout_and_stderr: stdout_and_stderr.gets(nil),
             exit_code: wait_thr.value.exitstatus
           }
         end

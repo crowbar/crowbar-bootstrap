@@ -348,7 +348,9 @@ module Crowbar
           }
           unless res[:database_setup][:success]
             logger.error(chef_solo_run[:stdout_and_stderr])
-            res[:error] = chef_solo_run[:stdout_and_stderr]
+            res[:errors] = {
+              data: chef_solo_run[:stdout_and_stderr]
+            }
             http_code = 422
             next
           end
@@ -360,7 +362,9 @@ module Crowbar
           unless res[:database_migration][:success]
             logger.error(database_migration[:stdout_and_stderr])
             http_code = 422
-            res[:error] = database_migration[:stdout_and_stderr]
+            res[:errors] = {
+              data: database_migration[:stdout_and_stderr]
+            }
             next
           end
 
@@ -371,7 +375,9 @@ module Crowbar
           unless res[:schema_migration][:success]
             logger.error(schema_migration[:stdout_and_stderr])
             http_code = 422
-            res[:error] = schema_migration[:stdout_and_stderr]
+            res[:errors] = {
+              data: schema_migration[:stdout_and_stderr]
+            }
             next
           end
 
@@ -382,13 +388,17 @@ module Crowbar
 
           if init[:body] # nil body means success
             logger.error(init[:body])
-            res[:error] = init[:body]
+            res[:errors] = {
+              data: init[:body]
+            }
             http_code = 422
           end
         end
 
-        if result[:error]
-          upgrade_status.end_step(false, database: result[:error])
+        if result[:errors] || http_code != 200
+          # reformat the error response to match common format
+          result[:errors] = { database_new: result[:errors] }
+          upgrade_status.end_step(false, result[:errors])
         else
           upgrade_status.end_step
         end
@@ -424,13 +434,18 @@ module Crowbar
         }
         http_code = 200
 
-        begin
-          test_db_connection(attributes[:postgresql])
-        rescue PG::ConnectionBad => e
-          halt 406, {}, e.message
-        end
 
         result = {}.tap do |res|
+          begin
+            test_db_connection(attributes[:postgresql])
+          rescue PG::ConnectionBad => e
+            res[:errors] = {
+              data: e.message
+            }
+            http_code = 406
+            next
+          end
+
           chef_solo_run = chef(attributes)
           res[:database_setup] = {
             success: chef_solo_run[:exit_code].zero?
@@ -438,7 +453,9 @@ module Crowbar
           unless res[:database_setup][:success]
             logger.error(chef_solo_run[:stdout_and_stderr])
             http_code = 422
-            res[:error] = chef_solo_run[:stdout_and_stderr]
+            res[:errors] = {
+              data: chef_solo_run[:stdout_and_stderr]
+            }
             next
           end
 
@@ -449,7 +466,9 @@ module Crowbar
           unless res[:database_migration][:success]
             logger.error(database_migration[:stdout_and_stderr])
             http_code = 422
-            res[:error] = database_migration[:stdout_and_stderr]
+            res[:errors] = {
+              data: database_migration[:stdout_and_stderr]
+            }
             next
           end
 
@@ -460,7 +479,9 @@ module Crowbar
           unless res[:schema_migration][:success]
             logger.error(schema_migration[:stdout_and_stderr])
             http_code = 422
-            res[:error] = schema_migration[:stdout_and_stderr]
+            res[:errors] = {
+              data: schema_migration[:stdout_and_stderr]
+            }
             next
           end
 
@@ -471,13 +492,17 @@ module Crowbar
 
           if init[:body] # nil body means success
             logger.error(init[:body])
-            res[:error] = init[:body]
+            res[:errors] = {
+              data: init[:body]
+            }
             http_code = 422
           end
         end
 
-        if result[:error]
-          upgrade_status.end_step(false, database: result[:error])
+        if result[:errors] || http_code != 200
+          # reformat the error response to match common format
+          result[:errors] = { database_connect: result[:errors] }
+          upgrade_status.end_step(false, result[:errors])
         else
           upgrade_status.end_step
         end
