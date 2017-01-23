@@ -31,24 +31,28 @@ module Crowbar
         set :environment, ENV["RAILS_ENV"]
       end
 
+      if settings.environment == :development
+        set :logpath, "#{settings.root}/log"
+      else
+        set :logpath, "/var/log/crowbar"
+      end
+
+      configure do
+        ::Logger.class_eval { alias :write :'<<' }
+        $logger = ::Logger.new("#{settings.logpath}/crowbar_init.log")
+        $error_logger = File.new("#{settings.logpath}/crowbar_init_application.log", "a+")
+        $error_logger.sync = true
+      end
+
       before do
-        logger.level = Logger::DEBUG
+        env["rack.logger"] = $logger
+        env["rack.errors"] = $error_logger
+
         # parse JSON in POST requests
         if request.request_method == "POST" &&
             (!request.content_type.nil? && request.content_type.include?("json"))
           params.merge!(JSON.parse(request.body.read, symbolize_names: true))
         end
-      end
-
-      configure do
-        logpath = if settings.environment == :development
-          "#{settings.root}/log/#{settings.environment}.log"
-        else
-          "/var/log/crowbar/crowbar_init_#{settings.environment}.log"
-        end
-        logfile = File.new(logpath, "a+")
-        logfile.sync = true
-        use Rack::CommonLogger, logfile
       end
 
       configure :development do
