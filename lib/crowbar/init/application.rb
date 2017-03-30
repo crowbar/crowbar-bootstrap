@@ -392,9 +392,7 @@ module Crowbar
 
           if init[:body] # nil body means success
             logger.error(init[:body])
-            res[:errors] = {
-              data: init[:body]
-            }
+            res[:errors] = init[:body]
             http_code = 422
           end
         end
@@ -496,9 +494,7 @@ module Crowbar
 
           if init[:body] # nil body means success
             logger.error(init[:body])
-            res[:errors] = {
-              data: init[:body]
-            }
+            res[:errors] = init[:body]
             http_code = 422
           end
         end
