@@ -230,7 +230,11 @@ module Crowbar
           logger.warn("Could not find #{file_path}. Using #{backup_file_path}.")
           unless File.exist?(backup_file_path)
             logger.error("Could not find #{backup_file_path} either.")
-            return false
+            return {
+              stdout_and_stderr: "Could not find database dump in #{file_path} " \
+                                 "or backup in #{backup_file_path}.",
+              exit_code: 1
+            }
           end
           FileUtils.cp(backup_file_path, file_path, preserve: true)
         end
