@@ -389,6 +389,18 @@ module Crowbar
           res[:crowbar_init] = {
             success: init[:code] == 200
           }
+          chef_data_upload = upload_chef_data
+          res[:chef_data_upload] = {
+            success: chef_data_upload[:exit_code].zero?
+          }
+          unless res[:chef_data_upload][:success]
+            logger.error(chef_data_upload[:stdout_and_stderr])
+            http_code = 422
+            res[:errors] = {
+              data: chef_data_upload[:stdout_and_stderr]
+            }
+            next
+          end
 
           if init[:body] # nil body means success
             logger.error(init[:body])
@@ -491,6 +503,18 @@ module Crowbar
           res[:crowbar_init] = {
             success: init[:code] == 200
           }
+          chef_data_upload = upload_chef_data
+          res[:chef_data_upload] = {
+            success: chef_data_upload[:exit_code].zero?
+          }
+          unless res[:chef_data_upload][:success]
+            logger.error(chef_data_upload[:stdout_and_stderr])
+            http_code = 422
+            res[:errors] = {
+              data: chef_data_upload[:stdout_and_stderr]
+            }
+            next
+          end
 
           if init[:body] # nil body means success
             logger.error(init[:body])
