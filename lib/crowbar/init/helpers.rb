@@ -250,6 +250,14 @@ module Crowbar
         )
       end
 
+      def upload_chef_data
+        logger.debug("Uploading latest chef data")
+        run_cmd(
+          "cd /opt/dell/crowbar_framework && " \
+          "RAILS_ENV=production bin/rake chef:upload:all"
+        )
+      end
+
       def update_config_db
         logger.debug("Updating crowbar configuration DB")
         run_cmd(
