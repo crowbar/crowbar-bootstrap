@@ -138,7 +138,7 @@ module Crowbar
 
         Thread.new do
           # wait a bit to let the API request come back with 200
-          sleep 10
+          sleep 20
           cmd_ret = run_cmd(
             "sudo",
             "systemctl",
