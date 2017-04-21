@@ -14,11 +14,14 @@
 # limitations under the License.
 #
 
+default: &default
+  adapter: postgresql
+  host: <%= @host %>
+  port: <%= @port %>
+  database: <%= @database %>
+  pool: 5
+  username: <%= @username %>
+  password: <%= @password %>
+
 production:
-   adapter: postgresql
-   host: <%= @host %>
-   port: <%= @port %>
-   database: <%= @database %>
-   pool: 5
-   username: <%= @username %>
-   password: <%= @password %>
+  <<: *default
