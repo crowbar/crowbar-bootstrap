@@ -16,7 +16,7 @@
 
 case node[:platform_family]
 when "suse"
-  package "postgresql94-server"
+  package "postgresql-server"
 else
   package "postgresql"
 end
