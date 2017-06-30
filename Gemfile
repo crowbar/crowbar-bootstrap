@@ -23,6 +23,7 @@ gem "json", ">= 1.4.4", "<= 1.8.1"
 gem "sinatra", ">= 1.4.6"
 gem "sinatra-contrib", ">= 1.4.7"
 gem "pg", "~> 0.17.1"
+gem "mustermann", "<1.0.0"
 
 unless ENV["CROWBAR_INIT_ENV"] && ENV["CROWBAR_INIT_ENV"] == "production"
   group :test do
