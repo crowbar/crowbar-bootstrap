@@ -1,7 +1,7 @@
 [Unit]
 Description=Crowbar Init
 After=network.target syslog.target remote-fs.target
-Requires=apache2.service
+Wants=apache2.service
 
 [Service]
 Type=simple
