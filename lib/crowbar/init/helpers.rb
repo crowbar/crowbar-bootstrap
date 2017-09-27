@@ -15,6 +15,7 @@
 #
 
 require "fileutils"
+require "timeout"
 
 module Crowbar
   module Init
@@ -187,9 +188,12 @@ module Crowbar
       def wait_for_crowbar
         logger.debug("Waiting for crowbar to become available")
         begin
-          # TODO: add a timeout handling and set the status in case of a timeout
-          sleep 1 until crowbar_status[:body]
-          sleep 1 until crowbar_status[:body].include? "installer-installers"
+          Timeout::timeout(120) {
+            sleep 1 until crowbar_status[:body]
+          }
+          Timeout::timeout(30) {
+            sleep 1 until crowbar_status[:body].include? "installer-installers"
+          }
 
           # apache takes some time to perform the final switch
           # TODO: implement a busyloop
@@ -197,6 +201,13 @@ module Crowbar
           {
             message: "",
             exit_code: 0
+          }
+        rescue Timeout::Error
+          msg = "Timout while waiting for crowbar to become available"
+          logger.error(msg)
+          {
+            message: msg,
+            exit_code: 2
           }
         rescue => e
           {
