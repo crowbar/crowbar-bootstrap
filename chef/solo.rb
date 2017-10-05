@@ -21,7 +21,7 @@ root_path = File.expand_path("../..", __FILE__)
 # log_level specifies the level of verbosity for output.
 # valid values are: :debug, :info, :warn, :error, :fatal
 
-log_level :warn
+log_level :debug
 
 # log_location specifies where chef-solo should log to.
 # valid values are: a quoted string specifying a file, or STDOUT with
