@@ -151,23 +151,27 @@ module Crowbar
         cmd_ret
       end
 
-      def crowbar_status(request_type = :html)
-        uri = if request_type == :html
-          URI.parse(installer_url)
+      def crowbar_request(url, request_type = :get, response_type = :html)
+        uri = URI.parse(url)
+
+        req = if request_type == :post
+          Net::HTTP::Post.new(
+            uri.request_uri
+          )
         else
-          URI.parse(status_url)
+          Net::HTTP::Get.new(
+            uri.request_uri
+          )
         end
 
         res = Net::HTTP.new(
           uri.host,
           uri.port
         ).request(
-          Net::HTTP::Get.new(
-            uri.request_uri
-          )
+          req
         )
 
-        body = if request_type == :html
+        body = if response_type == :html
           res.body
         else
           JSON.parse(res.body)
@@ -182,6 +186,12 @@ module Crowbar
           code: 500,
           body: nil
         }
+      end
+
+      def crowbar_status(response_type = :html)
+        crowbar_request(response_type == :html ? installer_url : status_url,
+                        :get,
+                        response_type)
       end
 
       # TODO: this method needs to be refactored a bit in general
