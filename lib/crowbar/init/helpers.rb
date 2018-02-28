@@ -216,12 +216,12 @@ module Crowbar
           msg = "Timout while waiting for crowbar to become available"
           logger.error(msg)
           {
-            message: msg,
+            stdout_and_stderr: msg,
             exit_code: 2
           }
         rescue => e
           {
-            message: e.message.inspect,
+            stdout_and_stderr: e.message.inspect,
             exit_code: 1
           }
         end
