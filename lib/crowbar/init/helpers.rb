@@ -73,6 +73,10 @@ module Crowbar
         "#{installer_url}/status.json"
       end
 
+      def sanity_check_url
+        "http://localhost:3000/sanity/check"
+      end
+
       def symlink_apache_to(name)
         crowbar_apache_conf = "#{crowbar_apache_path}/crowbar.conf.partial"
         crowbar_apache_conf_partial = "crowbar-#{name}.conf.partial"
@@ -151,23 +155,27 @@ module Crowbar
         cmd_ret
       end
 
-      def crowbar_status(request_type = :html)
-        uri = if request_type == :html
-          URI.parse(installer_url)
+      def crowbar_request(url, request_type = :get, response_type = :html)
+        uri = URI.parse(url)
+
+        req = if request_type == :post
+          Net::HTTP::Post.new(
+            uri.request_uri
+          )
         else
-          URI.parse(status_url)
+          Net::HTTP::Get.new(
+            uri.request_uri
+          )
         end
 
         res = Net::HTTP.new(
           uri.host,
           uri.port
         ).request(
-          Net::HTTP::Get.new(
-            uri.request_uri
-          )
+          req
         )
 
-        body = if request_type == :html
+        body = if response_type == :html
           res.body
         else
           JSON.parse(res.body)
@@ -184,6 +192,16 @@ module Crowbar
         }
       end
 
+      def crowbar_status(response_type = :html)
+        crowbar_request(response_type == :html ? installer_url : status_url,
+                        :get,
+                        response_type)
+      end
+
+      def run_sanity_check
+        crowbar_request(sanity_check_url, :post, :json)
+      end
+
       # TODO: this method needs to be refactored a bit in general
       def wait_for_crowbar
         logger.debug("Waiting for crowbar to become available")
@@ -191,6 +209,16 @@ module Crowbar
           Timeout::timeout(120) {
             sleep 1 until crowbar_status[:body]
           }
+
+          # (re)trigger sanity check and break if any test fails
+          failing_checks = run_sanity_check[:body]
+          unless failing_checks.empty?
+            return {
+              stdout_and_stderr: "Sanity check failed: #{failing_checks.join(' ')}",
+              exit_code: 3
+            }
+          end
+
           Timeout::timeout(30) {
             sleep 1 until crowbar_status[:body].include? "installer-installers"
           }
@@ -206,12 +234,12 @@ module Crowbar
           msg = "Timout while waiting for crowbar to become available"
           logger.error(msg)
           {
-            message: msg,
+            stdout_and_stderr: msg,
             exit_code: 2
           }
         rescue => e
           {
-            message: e.message.inspect,
+            stdout_and_stderr: e.message.inspect,
             exit_code: 1
           }
         end
