@@ -11,11 +11,11 @@ Style/RedundantReturn:
   Exclude:
     - "chef/data_bags/crowbar/migrate/**/*"
 
-Style/FileName:
+Naming/FileName:
   Exclude:
     - "lib/crowbar-*"
 
-Style/AlignHash:
+Layout/AlignHash:
   EnforcedHashRocketStyle: key
   EnforcedColonStyle: key
 
